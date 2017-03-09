@@ -3,6 +3,10 @@
 #include<ctime>
 #include<algorithm>
 
+#define LICZBA_PROB 1000
+#define KROK 1000
+#define LICZBA_KROKOW 15
+
 using namespace std;
 
 void selection_sort(int *tab, int size)
@@ -17,6 +21,31 @@ void selection_sort(int *tab, int size)
 
         swap(tab[a], tab[i]);
     }
+}
+
+void merge_sort(int *a, int start, int size, int *b)
+{
+    int middle = ((start + size) / 2) - 1;
+    if((middle - start) > 0) merge_sort(a, start, middle+1, b);
+    if((size - middle) > 2) merge_sort(a, middle+1, size, b);
+    int i = start;
+    int j = middle + 1;
+    for(int k = start; k < size; k++)
+    {
+        if(((i <= middle) && (j >= size)) || (((i <= middle) && (j < size)) && (a[i] <= a[j])))
+        {
+            b[k] = a[i];
+            i = i + 1;
+        }
+        else
+        {
+            b[k] = a[j];
+            j = j + 1;
+        }
+    }
+    for(int k = start; k < size; k++)
+        a[k] = b[k];
+
 }
 
 void insertion_sort(int *tab, int size)
@@ -37,37 +66,52 @@ void insertion_sort(int *tab, int size)
 
 int main()
 {
-    int k = 1000, n = 1;
+    int k = KROK, n = LICZBA_KROKOW;
     double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
     srand(time(NULL));
     clock_t start;
-    while (n < 16)
+    while (n <= 15)
     {
-        for (int proba = 0; proba < 10; proba++)
+        for (int proba = 0; proba < LICZBA_PROB; proba++)
         {
-            int *dane = new int[k*n];
+            int *dane_is = new int[k*n], *dane_ss = new int[k*n];
+            int *dane_hs = new int[k*n], *dane_ms = new int[k*n];
             for (int i = 0; i < k*n; i++)
             {
-                dane[i] = rand() % (k*n*10);	//generujê dane z zagresu 0 - n*k*10, zamiast 0 - n*k. Lepsza próbka
+                dane_is[i] = dane_ss[i] = dane_hs[i] = dane_ms[i] = rand() % (k*n*10);
             }
+
             //INSERTION SORT
             start = clock();	//inicjalizacja timera
-            insertion_sort(dane, k*n);
+            insertion_sort(dane_is, k*n);
             t_is += (clock() - start) / (double)CLOCKS_PER_SEC;
             //cout << (clock() - start) / (double)CLOCKS_PER_SEC << " ";
 
             //SELECTION SORT
             start = clock();	//inicjalizacja timera
-            selection_sort(dane, k*n);
+            selection_sort(dane_ss, k*n);
             t_ss += (clock() - start) / (double)CLOCKS_PER_SEC;
+            //cout << (clock() - start) / (double)CLOCKS_PER_SEC << " ";
+
+            //MERGE SORT
+            int *b = new int[k*n];
+            start = clock();	//inicjalizacja timera
+            merge_sort(dane_ms, 0, k*n, b);
+            t_ms += (clock() - start) / (double)CLOCKS_PER_SEC;
             //cout << (clock() - start) / (double)CLOCKS_PER_SEC << " || ";
 
-            delete[] dane;
+            delete[] dane_is;
+            delete[] dane_ss;
+            delete[] dane_hs;
+            delete[] dane_ms;
         }
-        t_ss /= 10;
-        t_is /= 10;
-        cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << endl;
+        cout<<endl;
+        t_ss /= LICZBA_PROB;
+        t_is /= LICZBA_PROB;
+        t_ms /= LICZBA_PROB;
+        cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << ", t_ms= " << t_ms << endl;
         n++;
+        t_ss = t_is = t_ms = t_hs = 0;   //konieczne zerowanie liczników czasu - inaczej pomiary są zafałszowane
     }
 
     return 0;
