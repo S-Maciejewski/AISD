@@ -1,9 +1,12 @@
+#include "stdafx.h"
 #include<cstdlib>
 #include<iostream>
 #include<ctime>
 #include<algorithm>
+#include<fstream>
+#include<iomanip>
 
-#define LICZBA_PROB 1000
+#define LICZBA_PROB 10
 #define KROK 1000
 #define LICZBA_KROKOW 15
 
@@ -66,11 +69,13 @@ void insertion_sort(int *tab, int size)
 
 int main()
 {
-    int k = KROK, n = LICZBA_KROKOW;
+    int k = KROK, n = 1;
     double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
     srand(time(NULL));
+	ofstream out("wyniki.txt");
+	out << setw(2) << "n," << setw(7) << "t_is," << setw(7) << "t_ss," << setw(7) << "t_ms,"<<endl;
     clock_t start;
-    while (n <= 15)
+    while (n <= LICZBA_KROKOW)
     {
         for (int proba = 0; proba < LICZBA_PROB; proba++)
         {
@@ -99,19 +104,18 @@ int main()
             merge_sort(dane_ms, 0, k*n, b);
             t_ms += (clock() - start) / (double)CLOCKS_PER_SEC;
             //cout << (clock() - start) / (double)CLOCKS_PER_SEC << " || ";
-
             delete[] dane_is;
             delete[] dane_ss;
             delete[] dane_hs;
             delete[] dane_ms;
         }
-        cout<<endl;
         t_ss /= LICZBA_PROB;
         t_is /= LICZBA_PROB;
         t_ms /= LICZBA_PROB;
         cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << ", t_ms= " << t_ms << endl;
+		out << setw(2) << n << "," << setw(7) << t_is << "," << setw(7) << t_ss << "," << setw(7) << t_ms << "," << endl;
         n++;
-        t_ss = t_is = t_ms = t_hs = 0;   //konieczne zerowanie liczników czasu - inaczej pomiary są zafałszowane
+        t_ss = t_is = t_ms = t_hs = 0;   //konieczne zerowanie licznikow czasu - inaczej pomiary sa zafalszowane
     }
 
     return 0;
