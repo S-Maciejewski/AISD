@@ -1,7 +1,3 @@
-// C++ Algorytmika.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
 #include<cstdlib>
 #include<iostream>
 #include<ctime>
@@ -9,53 +5,70 @@
 
 using namespace std;
 
-
-void s_sort(int *tab, int size)
+void selection_sort(int *tab, int size)
 {
-	int a;
-	for (int i = 0; i < size; i++)
-	{
-		a = i;
-		for (int j = i + 1; j < size; j++)
-			if (tab[j] < tab[a])
-				a = j;
+    int a;
+    for (int i = 0; i < size; i++)
+    {
+        a = i;
+        for (int j = i + 1; j < size; j++)
+            if (tab[j] < tab[a])
+                a = j;
 
-		swap(tab[a], tab[i]);
-	}
+        swap(tab[a], tab[i]);
+    }
 }
 
-int main() 
+void insertion_sort(int *tab, int size)
 {
-	int k = 1000, n = 1;
-	double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
-	srand(time(NULL));
-	while (n < 16)
-	{
+    int i;
+    for(int j = 1; j < size; j++)
+    {
+        int key = tab[j];
+        i = j - 1;
+        while (i >= 0 && key < tab[i])
+        {
+            tab[i + 1] = tab[i];
+            tab[i] = key;
+            i--;
+        }
+    }
+}
 
-	
+int main()
+{
+    int k = 1000, n = 1;
+    double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
+    srand(time(NULL));
+    clock_t start;
+    while (n < 16)
+    {
+        for (int proba = 0; proba < 10; proba++)
+        {
+            int *dane = new int[k*n];
+            for (int i = 0; i < k*n; i++)
+            {
+                dane[i] = rand() % (k*n*10);	//generujÃª dane z zagresu 0 - n*k*10, zamiast 0 - n*k. Lepsza prÃ³bka
+            }
+            //INSERTION SORT
+            start = clock();	//inicjalizacja timera
+            insertion_sort(dane, k*n);
+            t_is += (clock() - start) / (double)CLOCKS_PER_SEC;
+            //cout << (clock() - start) / (double)CLOCKS_PER_SEC << " ";
 
-	for (int proby = 0; proby < 10; proby++)
-	{
-		int *dane = new int[k*n];
-		for (int i = 0; i < k*n; i++)
-		{
-			dane[i] = rand() % (k*n * 10);	//generujê dane z zagresu 0 - n*k*10, zamiast 0 - n*k. Lepsza próbka
-		}
+            //SELECTION SORT
+            start = clock();	//inicjalizacja timera
+            selection_sort(dane, k*n);
+            t_ss += (clock() - start) / (double)CLOCKS_PER_SEC;
+            //cout << (clock() - start) / (double)CLOCKS_PER_SEC << " || ";
 
-		//zrobiæ dla wszystkich losowañ
-		const clock_t start = clock();	//inicjalizacja timera
-		s_sort(dane, k*n);
-		t_ss += (clock() - start) / (double)CLOCKS_PER_SEC;
-		//cout << (clock() - start) / (double)CLOCKS_PER_SEC << endl;
-
-		delete[] dane;
-	}
-	t_ss /= 10;
-	cout << "n = " << n << ", t= " << t_ss << endl;
-	
-	n++;
-	}
+            delete[] dane;
+        }
+        t_ss /= 10;
+        t_is /= 10;
+        cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << endl;
+        n++;
+    }
 
     return 0;
 }
-
