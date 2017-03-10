@@ -158,7 +158,8 @@ int main()
         t_ss /= LICZBA_PROB;
         t_is /= LICZBA_PROB;
         t_ms /= LICZBA_PROB;
-
+	t_hs /= LICZBA_PRÓB;
+		
         cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << ", t_ms= " << t_ms << ", t_hs= " << t_hs << endl;
 		out << setw(2) << n << "," << setw(7) << t_is << "," << setw(7) << t_ss << "," << setw(7) << t_ms << "," << setw(7) << t_ms << endl;
 
