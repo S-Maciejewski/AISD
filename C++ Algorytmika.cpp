@@ -113,7 +113,7 @@ int main()
     double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
     srand(time(NULL));
 	ofstream out("wyniki.txt");
-	out << setw(2) << "n," << setw(7) << "t_is," << setw(7) << "t_ss," << setw(7) << "t_ms,"<<endl;
+	out << setw(2) << "n," << setw(7) << "t_is," << setw(7) << "t_ss," << setw(7) << "t_ms,"<<"t_hs"<<endl;
     clock_t start;
     while (n <= LICZBA_KROKOW)
     {
@@ -158,10 +158,10 @@ int main()
         t_ss /= LICZBA_PROB;
         t_is /= LICZBA_PROB;
         t_ms /= LICZBA_PROB;
-	t_hs /= LICZBA_PRÓB;
-		
+		t_hs /= LICZBA_PROB;
+
         cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << ", t_ms= " << t_ms << ", t_hs= " << t_hs << endl;
-		out << setw(2) << n << "," << setw(7) << t_is << "," << setw(7) << t_ss << "," << setw(7) << t_ms << "," << setw(7) << t_ms << endl;
+		out << setw(2) << n << "," << setw(7) << t_is << "," << setw(7) << t_ss << "," << setw(7) << t_ms << "," << setw(7) << t_hs << endl;
 
         n++;
         t_ss = t_is = t_ms = t_hs = 0;   //konieczne zerowanie licznikow czasu - inaczej pomiary sa zafalszowane
