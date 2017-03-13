@@ -109,7 +109,7 @@ void heap_sort(int *tab, int size)
 
 int main()
 {
-    int k = KROK, n = 1;
+    int k = KROK, n = 1, random;
     double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
     srand(time(NULL));
 	ofstream out("wyniki.txt");
@@ -143,6 +143,7 @@ int main()
 		}
 		*/
 
+		/*
 		//Probka posortowana malejaco
 		for (int i = 0; i < k*n; i++)
 		{
@@ -159,9 +160,37 @@ int main()
 		{
 			swap(dane_ms[i], dane_ms[n*k - i - 1]);
 		}
+		*/
+
+		/*
+		//Probka stala
+		random = rand() % (k*n * 10);
+		for (int j = 0; j < n*k; j++)
+		{
+			dane_is[j] = dane_ss[j] = dane_hs[j] = dane_ms[j] = random;
+		}
+		*/
 
 
-		
+		//Probka v-ksztaltna
+		for (int i = 0; i < k*n; i++)
+		{
+			dane_ms[i] = rand() % (k*n * 10);
+		}
+		int *temp = new int[k*n];
+		merge_sort(dane_ms, 0, k*n, temp);
+		for (int j = 0; j < n*k - 1; j+=2)
+		{
+			temp[n*k/2 - 1 - j/2] = dane_ms[j];
+			temp[n*k/2 + j/2] = dane_ms[j + 1];
+		}
+		for (int i = 0; i < k*n; i++)
+		{
+			dane_is[i] = dane_ss[i] = dane_hs[i] = dane_ms[i] = temp[i];
+		}
+		delete[] temp;
+
+
         for (int proba = 0; proba < LICZBA_PROB; proba++)
         {
             //INSERTION SORT
@@ -201,7 +230,6 @@ int main()
 
         cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << ", t_ms= " << t_ms << ", t_hs= " << t_hs << endl;
 		out << setw(2) << n << "," << setw(7) << t_is << "," << setw(7) << t_ss << "," << setw(7) << t_ms << "," << setw(7) << t_hs << endl;
-
         n++;
         t_ss = t_is = t_ms = t_hs = 0;   //konieczne zerowanie licznikow czasu - inaczej pomiary sa zafalszowane
     }
