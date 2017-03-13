@@ -7,7 +7,7 @@
 #include<iomanip>
 
 #define LICZBA_PROB 10
-#define KROK 10000
+#define KROK 1000
 #define LICZBA_KROKOW 15
 
 using namespace std;
@@ -113,17 +113,55 @@ int main()
     double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
     srand(time(NULL));
 	ofstream out("wyniki.txt");
-	out << setw(2) << "n," << setw(7) << "t_is," << setw(7) << "t_ss," << setw(7) << "t_ms,"<<"t_hs"<<endl;
+	out << setw(2) << " n," << setw(7) << "t_is," << setw(7) << "t_ss," << setw(7) << "t_ms," << setw(7) <<"t_hs"<<endl;
     clock_t start;
     while (n <= LICZBA_KROKOW)
     {
 		int *dane_is = new int[k*n], *dane_ss = new int[k*n];
 		int *dane_hs = new int[k*n], *dane_ms = new int[k*n];
+
+		/*
+		//Probka losowa
 		for (int i = 0; i < k*n; i++)
 		{
 			dane_is[i] = dane_ss[i] = dane_hs[i] = dane_ms[i] = rand() % (k*n * 10);
 		}
+		*/
 
+		/*
+		//Probka posortowana rosnaco
+		for (int i = 0; i < k*n; i++)	
+		{
+			dane_ms[i] = rand() % (k*n * 10);
+		}
+		int *temp = new int[k*n];
+		merge_sort(dane_ms, 0, k*n, temp);
+		delete[] temp;
+		for (int j = 0; j < n*k; j++)
+		{
+			dane_is[j] = dane_ss[j] = dane_hs[j] = dane_ms[j];
+		}
+		*/
+
+		//Probka posortowana malejaco
+		for (int i = 0; i < k*n; i++)
+		{
+			dane_ms[i] = rand() % (k*n * 10);
+		}
+		int *temp = new int[k*n];
+		merge_sort(dane_ms, 0, k*n, temp);
+		delete[] temp;
+		for (int j = 0; j < n*k; j++)
+		{
+			dane_is[j] = dane_ss[j] = dane_hs[j] = dane_ms[n*k-j-1];
+		}
+		for (int i = 0; i < n*k / 2; i++)
+		{
+			swap(dane_ms[i], dane_ms[n*k - i - 1]);
+		}
+
+
+		
         for (int proba = 0; proba < LICZBA_PROB; proba++)
         {
             //INSERTION SORT
@@ -140,6 +178,7 @@ int main()
             int *b = new int[k*n];
             start = clock();	//inicjalizacja timera
             merge_sort(dane_ms, 0, k*n, b);
+			delete[] b;
             t_ms += (clock() - start) / (double)CLOCKS_PER_SEC;
 
 			//HEAP SORT
