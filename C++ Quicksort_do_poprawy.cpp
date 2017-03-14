@@ -5,9 +5,9 @@
 #include<algorithm>
 #include<iomanip>
 
-#define LICZBA_PROB 1
-#define KROK 10
-#define LICZBA_KROKOW 2
+#define LICZBA_PROB 100
+#define KROK 10000
+#define LICZBA_KROKOW 15
 
 using namespace std;
 
@@ -20,18 +20,20 @@ void printtab(int *tab, int size)
     cout<<endl;
 }
 
+int draw(int min, int max)
+{
+    int result;
+    srand(time(NULL));
+    result = (rand() % (max - min + 1)) + min;
+    return result;
+}
+
 int partition(int *tab, int left, int right, int version)
 {
     int piwot;
     if(version == 0) piwot = tab[(left + right) / 2];   // środek
     if(version == 1) piwot = tab[right];                // prawo
-    if(version == 2)                                    // losowo
-    {
-        srand(time(NULL));
-        piwot = tab[rand()%(right-1)];
-        printtab(tab, right+1);
-        cout<<"piwot : "<<piwot<<endl;
-    }
+    if(version == 2) piwot = tab[draw(left, right)];
 
     int l = left, r = right;
     while (true)
@@ -45,7 +47,7 @@ int partition(int *tab, int left, int right, int version)
         }
         else
         {
-            if(version == 2) printtab(tab, right+1);
+//            if(version == 2) printtab(tab, right+1);
             return r;
         }
     }
@@ -114,7 +116,7 @@ int main()
             {
                 dane_qs_iter[i] = rand() % (k*n * 10);
             }
-            printtab(dane_qs_iter, n*k);
+            //printtab(dane_qs_iter, n*k);
             int *temp = new int[k*n];
             quicksort_iteration(dane_qs_iter, 0, k*n-1, 0);
             for (int j = 0; j < n*k; j+=2)
@@ -128,8 +130,7 @@ int main()
                 dane_qs_iter0[i] = dane_qs_iter1[i] = dane_qs_iter2[i] = temp[i];
             }
             delete[] temp;
-            //cout<<"Tablica A-ksztaltna"<<endl;
-            //printtab(dane_qs_iter0, n*k);
+
 //            for (int i = 0; i < k * n; i++)
 //            {
 //                dane_qs_recur[i] = dane_qs_iter[i] = rand() % (k * n * 10);
@@ -144,23 +145,28 @@ int main()
 //            t_qs_recur += (clock() - start) / (double) CLOCKS_PER_SEC;
 
             //ITERATIVE VERSION
-            cout<<"środek"<<endl;
+            //cout<<"środek"<<endl;
             start = clock();    //inicjalizacja timera
             quicksort_recursion(dane_qs_iter0, 0, k*n-1, 0);
             time0 += (clock() - start) / (double) CLOCKS_PER_SEC;
 
-            cout<<"prawo"<<endl;
+
+            //cout<<"prawo"<<endl;
             start = clock();    //inicjalizacja timera
             quicksort_recursion(dane_qs_iter1, 0, k*n-1, 1);
             time1 += (clock() - start) / (double) CLOCKS_PER_SEC;
 
-            cout<<"losowo"<<endl;
+
             start = clock();    //inicjalizacja timera
             quicksort_recursion(dane_qs_iter2, 0, k*n-1, 2);
             time2 += (clock() - start) / (double) CLOCKS_PER_SEC;
 
+
             delete[] dane_qs_iter;
 //            delete[] dane_qs_recur;
+            delete[] dane_qs_iter0;
+            delete[] dane_qs_iter1;
+            delete[] dane_qs_iter2;
         }
 
         time0 /= LICZBA_PROB;
