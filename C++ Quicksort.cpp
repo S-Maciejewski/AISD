@@ -20,36 +20,42 @@ void printtab(int *tab, int size)
     cout<<endl;
 }
 
-int partition(int *tab, int left, int right)
+int partition(int *tab, int left, int right, int version)
 {
-    //method of finding piwot
-    int piwot = tab[(left+right)/2];
-    int l = left, r = right;
-    while(true)
+    int piwot;
+    if(version == 0) piwot = tab[(left + right) / 2];   // środek
+    if(version == 1) piwot = tab[right];                // prawo
+    if(version == 2)                                    // losowo
     {
-        while(tab[l] < piwot) l++;
-        while(tab[r] > piwot) r--;
-        if(l<r)
-        {
-            if(tab[l] == tab[r]) l++;
+        srand(time(NULL));
+        piwot = tab[rand()%(right+1)];
+    }
+
+    int l = left, r = right;
+    while (true)
+    {
+        while (tab[l] < piwot) l++;
+        while (tab[r] > piwot) r--;
+        if (l < r) {
+            if (tab[l] == tab[r]) l++;
             else swap(tab[l], tab[r]);
         }
         else return r;
     }
 }
 
-void quicksort_recursion(int *tab, int left, int right)
+void quicksort_recursion(int *tab, int left, int right, int version)
 {
     int middle;
     if(left < right)
     {
-        middle = partition(tab, left, right); // checking whether there is more than one element in array
-        quicksort_recursion(tab, left, middle-1);
-        quicksort_recursion(tab, middle + 1, right);
+        middle = partition(tab, left, right, version); // checking whether there is more than one element in array
+        quicksort_recursion(tab, left, middle-1, version);
+        quicksort_recursion(tab, middle + 1, right, version);
     }
 }
 
-void quicksort_iteration (int *tab, int left, int right)
+void quicksort_iteration (int *tab, int left, int right, int version)
 {
     int stack[right];
     int stack_top = -1;
@@ -63,7 +69,7 @@ void quicksort_iteration (int *tab, int left, int right)
         right = stack[stack_top--];
         left = stack[stack_top--];
 
-        int piwot = partition(tab, left, right );
+        int piwot = partition(tab, left, right, version);
 
         if ( piwot-1 > left )
         {
@@ -92,20 +98,22 @@ int main()
         {
             int *dane_qs_recur = new int[k * n], *dane_qs_iter = new int[k * n];
 
+            //DODAĆ A-KSZTAŁTNY CIĄG WEJŚCIOWY
             for (int i = 0; i < k * n; i++)
             {
                 dane_qs_recur[i] = dane_qs_iter[i] = rand() % (k * n * 10);
             }
 
+            //WYBRAĆ RODZAJ DANYCH DO POSORTOWANIA
 
             //RECURSIVE VERSION
             start = clock();    //inicjalizacja timera
-            quicksort_recursion(dane_qs_recur, 0, k*n-1);
+            quicksort_recursion(dane_qs_recur, 0, k*n-1, 0);
             t_qs_recur += (clock() - start) / (double) CLOCKS_PER_SEC;
 
             //ITERATIVE VERSION
             start = clock();    //inicjalizacja timera
-            quicksort_iteration(dane_qs_iter, 0, k*n-1);
+            quicksort_iteration(dane_qs_iter, 0, k*n-1, 0);
             t_qs_iter += (clock() - start) / (double) CLOCKS_PER_SEC;
 
             delete[] dane_qs_iter;
@@ -116,10 +124,8 @@ int main()
         t_qs_recur /= LICZBA_PROB;
 
         out << setw(2) << n << "," << setw(8) << t_qs_recur << "," << setw(8) << t_qs_iter << endl;
-        n++;
+          n++;
         t_qs_iter = t_qs_recur = 0;   //konieczne zerowanie licznikow czasu - inaczej pomiary sa zafalszowane
     }
     return 0;
 }
-
-
