@@ -1,0 +1,39 @@
+selection sort
+bardzo podobny przebieg na ka¿dym z 3 wykresów
+
+merge sort a heap sort
+bardzo podobny przebieg ale heap jest przesuniêty w górê, 
+poniewa¿ zawiera dodatkowe funkcje 
+brak odwo³añ do innych funkcji 
+
+dane malej¹ce - ró¿nica miêdzy insert a selection jest zmniejszona, 
+poniewa¿ dla tego typu danych insert sort w ka¿dym kroku bêdzie musia³
+wykonaæ przesuniêcie ka¿dej liczby na pocz¹tek tablicy 
+
+potwierdzenie zlo¿onoœci obliczeniowej algorytmów - drastyczna ró¿nica w z³o¿onoœci czasowej
+
+dane losowe i v-kszta³tne daj¹ bardzo podobny rezultat 
+z³o¿enie tablicy rosn¹cej i malej¹cej (best case i worst case) daje podobny 
+rezultat do próbki losowej (uœrednienie czasu) 
+
+dane malej¹ce - najgorszy scenariusz dla insert i select 
+
+selection sort - liczba porównañ jest sta³a dla ka¿dego wariantu danych a ró¿nice 
+czasowe wynikaj¹ tylko z iloœci zamian (min rosn¹cych i sta³ych, max malej¹cych, œrednio przy losowych) 
+
+dane malej¹ce - nie s¹ najgorsze dla heap i merge poniewa¿ te wykonuj¹ "skoki" po tablicy
+
+heap - dane malej¹ce daj¹ korzystny kopiec
+
+merge - dla danych uporz¹dkowanych w dowolny sposób merge daje 
+najlepszy rezultat (przy scalaniu w rekurencji algorytm nie musi ju¿ 
+rozbijaæ posortowanych tablic, dla danych malej¹cych scalanie na krzy¿, 
+a przy rosn¹cych w ogóle nie bêdzie zamienia³) 
+
+  
+
+
+
+
+dane sta³e i rosn¹ce 
+insert sort 
