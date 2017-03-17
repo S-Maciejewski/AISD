@@ -1,0 +1,14 @@
+Wprowadzenie 
+1) Krótki opis wykresów
+    Pierwsze 5 wykresów przedstawiających porównanie czasów działania algorytmów sortowania ( oznaczonych w 
+    legendzie poszczególnymi kolorami ) jest zrealizowanych w skali logarytmicznej, gdzie na osi OY 
+    są przedstawione czasy działania algorytmów w sekundach,a oś OX oznacza ilość danych do 
+    posortowania (15 kroków po 10000 liczb). Zastosowanie skali logartymicznej wynika z konieczności 
+    przedstawienia na jednym wykresie danych o dużej rozpiętości.
+2) Legenda
+3) Wprowadzenie do wykresów dla danych losowych, v-kształtnych i malejących.
+    Na początku przedstawione są wykresy dla danych losowych, v-kształtnych i malejących ze względu na 
+    ich zblizony przebieg.
+4) Wykresy 
+5) Opis
+    Z 
