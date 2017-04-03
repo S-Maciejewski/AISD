@@ -3,8 +3,9 @@
 #include <time.h>
 #include <math.h>
 #include <fstream>
+#include <random>
 
-#define DLUGOSC_LISTY 10000
+#define DLUGOSC_LISTY 50000
 
 using namespace std;
 
@@ -133,20 +134,24 @@ void l_remove(lista * & head, lista * e)
 
 int main()
 {
-	srand(time(NULL));
+	random_device random;
+	mt19937 gen(random());
+
 	ofstream out("wyniki.txt");
 	lista * L = NULL;
 	clock_t start;
-	double t_build_list = 0;
+	double t_build_list = 0, t_search_list = 0, t_del_list = 0;
 
 	out << "Wyniki dla " << DLUGOSC_LISTY << " elementow" << endl;
 
 	//Generowanie tablicy losowych, unikatowych elementow
+
+	uniform_int_distribution<> distribution(1, DLUGOSC_LISTY * 100);
 	int *tab = new int[DLUGOSC_LISTY];
 	tab[0] = rand() % (DLUGOSC_LISTY * 10);
 	for (int i = 0; i < DLUGOSC_LISTY;)
 	{
-		int r = rand() % (DLUGOSC_LISTY * 10);
+		int r = distribution(gen);
 		bool unique = true;
 		for (int j = i; j >= 0; j--)
 		{
@@ -157,7 +162,9 @@ int main()
 			tab[++i] = r;
 	}
 
+
 	//Wstawianie elementów do listy (z sortowaniem)
+
 	start = clock();
 	l_push_back(L, tab[0]);
 	if (tab[1] > tab[0])
@@ -186,8 +193,39 @@ int main()
 	}
 	t_build_list = (clock() - start) / (double)CLOCKS_PER_SEC;
 	//l_printl(L);
+
 	cout << "Zbudowanie posortowanej listy o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_build_list << " sekund" << endl;
-	out << "t_build_list, " << t_build_list;
+	out << "t_build_list, " << t_build_list << endl;
+	
+
+	//Wyszukiwanie elementow listy
+
+	start = clock();
+	for (int i = 0; i < DLUGOSC_LISTY; i++)
+	{
+		lista *e = L;
+		for (int j = 0; j < i; j++)
+		{
+			e = e->next;
+		}
+	}
+	t_search_list = (clock() - start) / (double)CLOCKS_PER_SEC;
+
+	cout << "Przeszukanie listy o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_search_list << " sekund" << endl;
+	out << "t_search_list, " << t_search_list << endl;
+
+
+	//Usuwanie listy
+
+	start = clock();
+	while (L->next)
+	{
+		l_pop_front(L);
+	}
+	t_del_list = (clock() - start) / (double)CLOCKS_PER_SEC;
+
+	cout << "Usuniecie listy o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_del_list << " sekund" << endl;
+	out << "t_del_list, " << t_del_list << endl;
 
 
 	return 0;
