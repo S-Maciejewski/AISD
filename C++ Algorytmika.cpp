@@ -1,238 +1,161 @@
 #include "stdafx.h"
-#include<cstdlib>
-#include<iostream>
-#include<ctime>
-#include<algorithm>
-#include<fstream>
-#include<iomanip>
+#include <iostream>
+#include <time.h>
+#include <math.h>
 
-#define LICZBA_PROB 10
-#define KROK 1000
-#define LICZBA_KROKOW 15
+#define DLUGOSC_LISTY 100
 
 using namespace std;
 
-void selection_sort(int *tab, int size)
+struct lista
 {
-    int a;
-    for (int i = 0; i < size; i++)
-    {
-        a = i;
-        for (int j = i + 1; j < size; j++)
-            if (tab[j] < tab[a])
-                a = j;
+	lista * next;
+	int data;
+};
 
-        swap(tab[a], tab[i]);
-    }
-}
-
-void merge_sort(int *a, int start, int size, int *b)
+//Liczenie elementow
+int l_size(lista * p)
 {
-    int middle = ((start + size) / 2) - 1;
-    if((middle - start) > 0) merge_sort(a, start, middle+1, b);
-    if((size - middle) > 2) merge_sort(a, middle+1, size, b);
-    int i = start;
-    int j = middle + 1;
-    for(int k = start; k < size; k++)
-    {
-        if(((i <= middle) && (j >= size)) || (((i <= middle) && (j < size)) && (a[i] <= a[j])))
-        {
-            b[k] = a[i];
-            i = i + 1;
-        }
-        else
-        {
-            b[k] = a[j];
-            j = j + 1;
-        }
-    }
-    for(int k = start; k < size; k++)
-        a[k] = b[k];
-
-}
-
-void insertion_sort(int *tab, int size)
-{
-    int i;
-    for(int j = 1; j < size; j++)
-    {
-        int key = tab[j];
-        i = j - 1;
-        while (i >= 0 && key < tab[i])
-        {
-            tab[i + 1] = tab[i];
-            tab[i] = key;
-            i--;
-        }
-    }
-}
-
-void heapify(int *tab, int i, int size)
-{
-	size -= 1;
-	int j, temp;
-	temp = tab[i];
-	j = 2 * i;
-	while (j <= size)
+	int c = 0;
+	while (p)
 	{
-		if (j < size && tab[j + 1] > tab[j])
-			j = j + 1;
-		if (temp > tab[j])
-			break;
-		else if (temp <= tab[j])
+		c++;    
+		p = p->next;
+	}
+	return c;
+}
+
+//Wyswietlanie elementow
+void l_printl(lista * p)
+{
+	cout << "Ilosc elementow : " << l_size(p) << endl;
+
+	for (int i = 0; p; p = p->next)
+		cout << "Element nr. " << i++ << ",  data = " << p->data << endl;
+	cout << endl;
+}
+
+//Wstawianie na poczatek listy
+void l_push_front(lista * & head, int v)
+{
+	lista * p;
+	p = new lista;  
+	p->data = v;      
+	p->next = head;
+	head = p;
+}
+
+//Wstawianie na koniec listy
+void l_push_back(lista * & head, int v)
+{
+	lista * p, *e;
+	e = new lista;  
+	e->next = NULL;   
+	e->data = v;
+	p = head;
+	if (p)
+	{
+		while (p->next) p = p->next;
+		p->next = e;
+	}
+	else head = e;
+}
+
+//Wstawianie przed e
+void l_insert_before(lista * & head, lista * e, int v)
+{
+	lista * p = head;
+	if (p == e) l_push_front(head, v);
+	else
+	{
+		while (p->next != e) p = p->next;
+		p->next = new lista;
+		p->next->next = e;
+		p->next->data = v;
+	}
+}
+
+//Wstawianie za e
+void l_insert_after(lista * e, int v)
+{
+	lista * p = new lista;
+	p->next = e->next;
+	p->data = v;
+	e->next = p;
+}
+
+//Usuwanie pierwszego elementu
+void l_pop_front(lista * & head)
+{
+	lista * p = head; 
+	if (p)
+	{
+		head = p->next;   
+		delete p;         
+	}
+}
+
+//Usuwanie ostatniego elementu
+void l_pop_back(lista * & head)
+{
+	lista * p = head; 
+	if (p)
+	{
+		if (p->next)
 		{
-			tab[j / 2] = tab[j];
-			j = 2 * j;
+			while (p->next->next) p = p->next;
+			delete p->next;
+			p->next = NULL;
+		}
+		else
+		{
+			delete p;
+			head = NULL;
 		}
 	}
-	tab[j / 2] = temp;
 }
 
-void build_heap(int *tab, int size)
+//Usuwanie wybranego elementu
+void l_remove(lista * & head, lista * e)
 {
-	size -= 1;
-	for (int i = size / 2; i >= 1; i--)
+	lista * p;
+	if (head == e) l_pop_front(head);
+	else
 	{
-		heapify(tab, i, size);
+		p = head;
+		while (p->next != e) p = p->next;
+		p->next = e->next;
+		delete e;
 	}
 }
 
-void heap_sort(int *tab, int size)
-{
-	size -= 1;
-	for (int i = size; i >= 2; i--)
-	{
-		swap(tab[1], tab[i]);
-		heapify(tab, 1, i - 1);
-	}
-}
 
 int main()
 {
-    int k = KROK, n = 1, random;
-    double t_ss = 0, t_is = 0, t_hs = 0, t_ms = 0;
-    srand(time(NULL));
-	ofstream out("wyniki.txt");
-	out << setw(2) << " n," << setw(7) << "t_is," << setw(7) << "t_ss," << setw(7) << "t_ms," << setw(7) <<"t_hs"<<endl;
-    clock_t start;
-    while (n <= LICZBA_KROKOW)
-    {
-		int *dane_is = new int[k*n], *dane_ss = new int[k*n];
-		int *dane_hs = new int[k*n], *dane_ms = new int[k*n];
+	srand(time(NULL));
+	lista * L = NULL;
 
-		/*
-		//Probka losowa
-		for (int i = 0; i < k*n; i++)
+	//Generowanie tablicy losowych, unikatowych elementow
+	int *tab = new int[DLUGOSC_LISTY];
+	tab[0] = rand() % (DLUGOSC_LISTY * 10);
+	
+	for (int i = 0; i < DLUGOSC_LISTY;)
+	{
+		int r = rand() % (DLUGOSC_LISTY * 10);
+		bool unique = true;
+		for (int j = 0; j < i; j++)
 		{
-			dane_is[i] = dane_ss[i] = dane_hs[i] = dane_ms[i] = rand() % (k*n * 10);
+			if (tab[j] == tab[i])
+				unique = false;
 		}
-		*/
-
-		/*
-		//Probka posortowana rosnaco
-		for (int i = 0; i < k*n; i++)	
+		if (unique)
 		{
-			dane_ms[i] = rand() % (k*n * 10);
+			tab[i++] = r;
 		}
-		int *temp = new int[k*n];
-		merge_sort(dane_ms, 0, k*n, temp);
-		delete[] temp;
-		for (int j = 0; j < n*k; j++)
-		{
-			dane_is[j] = dane_ss[j] = dane_hs[j] = dane_ms[j];
-		}
-		*/
+	}
 
-		/*
-		//Probka posortowana malejaco
-		for (int i = 0; i < k*n; i++)
-		{
-			dane_ms[i] = rand() % (k*n * 10);
-		}
-		int *temp = new int[k*n];
-		merge_sort(dane_ms, 0, k*n, temp);
-		delete[] temp;
-		for (int j = 0; j < n*k; j++)
-		{
-			dane_is[j] = dane_ss[j] = dane_hs[j] = dane_ms[n*k-j-1];
-		}
-		for (int i = 0; i < n*k / 2; i++)
-		{
-			swap(dane_ms[i], dane_ms[n*k - i - 1]);
-		}
-		*/
-
-		/*
-		//Probka stala
-		random = rand() % (k*n * 10);
-		for (int j = 0; j < n*k; j++)
-		{
-			dane_is[j] = dane_ss[j] = dane_hs[j] = dane_ms[j] = random;
-		}
-		*/
+	//Wstawianie elementów do listy (z sortowaniem)
 
 
-		//Probka v-ksztaltna
-		for (int i = 0; i < k*n; i++)
-		{
-			dane_ms[i] = rand() % (k*n * 10);
-		}
-		int *temp = new int[k*n];
-		merge_sort(dane_ms, 0, k*n, temp);
-		for (int j = 0; j < n*k - 1; j+=2)
-		{
-			temp[n*k/2 - 1 - j/2] = dane_ms[j];
-			temp[n*k/2 + j/2] = dane_ms[j + 1];
-		}
-		for (int i = 0; i < k*n; i++)
-		{
-			dane_is[i] = dane_ss[i] = dane_hs[i] = dane_ms[i] = temp[i];
-		}
-		delete[] temp;
-
-
-        for (int proba = 0; proba < LICZBA_PROB; proba++)
-        {
-            //INSERTION SORT
-            start = clock();	//inicjalizacja timera
-            insertion_sort(dane_is, k*n);
-            t_is += (clock() - start) / (double)CLOCKS_PER_SEC;
-
-            //SELECTION SORT
-            start = clock();	//inicjalizacja timera
-            selection_sort(dane_ss, k*n);
-            t_ss += (clock() - start) / (double)CLOCKS_PER_SEC;
-
-            //MERGE SORT
-            int *b = new int[k*n];
-            start = clock();	//inicjalizacja timera
-            merge_sort(dane_ms, 0, k*n, b);
-			delete[] b;
-            t_ms += (clock() - start) / (double)CLOCKS_PER_SEC;
-
-			//HEAP SORT
-			start = clock();	//inicjalizacja timera
-			build_heap(dane_hs, n*k);
-			heap_sort(dane_hs, n*k);
-			t_hs += (clock() - start) / (double)CLOCKS_PER_SEC;
-
-        }
-
-		delete[] dane_is;
-		delete[] dane_ss;
-		delete[] dane_ms;
-		delete[] dane_hs;
-
-        t_ss /= LICZBA_PROB;
-        t_is /= LICZBA_PROB;
-        t_ms /= LICZBA_PROB;
-		t_hs /= LICZBA_PROB;
-
-        cout << endl << "Dla " << n*k << " liczb : " << "t_is= " << t_is << ", t_ss= " << t_ss << ", t_ms= " << t_ms << ", t_hs= " << t_hs << endl;
-		out << setw(2) << n << "," << setw(7) << t_is << "," << setw(7) << t_ss << "," << setw(7) << t_ms << "," << setw(7) << t_hs << endl;
-        n++;
-        t_ss = t_is = t_ms = t_hs = 0;   //konieczne zerowanie licznikow czasu - inaczej pomiary sa zafalszowane
-    }
-
-    return 0;
+	return 0;
 }
