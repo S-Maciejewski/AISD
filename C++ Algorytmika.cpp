@@ -2,8 +2,9 @@
 #include <iostream>
 #include <time.h>
 #include <math.h>
+#include <fstream>
 
-#define DLUGOSC_LISTY 100
+#define DLUGOSC_LISTY 10000
 
 using namespace std;
 
@@ -133,28 +134,60 @@ void l_remove(lista * & head, lista * e)
 int main()
 {
 	srand(time(NULL));
+	ofstream out("wyniki.txt");
 	lista * L = NULL;
+	clock_t start;
+	double t_build_list = 0;
+
+	out << "Wyniki dla " << DLUGOSC_LISTY << " elementow" << endl;
 
 	//Generowanie tablicy losowych, unikatowych elementow
 	int *tab = new int[DLUGOSC_LISTY];
 	tab[0] = rand() % (DLUGOSC_LISTY * 10);
-	
 	for (int i = 0; i < DLUGOSC_LISTY;)
 	{
 		int r = rand() % (DLUGOSC_LISTY * 10);
 		bool unique = true;
-		for (int j = 0; j < i; j++)
+		for (int j = i; j >= 0; j--)
 		{
-			if (tab[j] == tab[i])
+			if (r == tab[j])
 				unique = false;
 		}
 		if (unique)
-		{
-			tab[i++] = r;
-		}
+			tab[++i] = r;
 	}
 
 	//Wstawianie elementów do listy (z sortowaniem)
+	start = clock();
+	l_push_back(L, tab[0]);
+	if (tab[1] > tab[0])
+		l_push_back(L, tab[1]);
+	else
+		l_push_front(L, tab[1]);
+	for (int i = 2; i < DLUGOSC_LISTY; i++)
+	{
+		lista *e = L;
+		bool inserted = false;
+		while (e->next)
+		{
+			if (tab[i] > e->data && tab[i] < e->next->data)
+			{
+				l_insert_after(e, tab[i]);
+				inserted = true;
+				break;
+			}
+			e = e->next;
+		}
+		if (!inserted)
+			if (tab[i] < L->data)
+				l_push_front(L, tab[i]);
+			else
+				l_push_back(L, tab[i]);
+	}
+	t_build_list = (clock() - start) / (double)CLOCKS_PER_SEC;
+	//l_printl(L);
+	cout << "Zbudowanie posortowanej listy o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_build_list << " sekund" << endl;
+	out << "t_build_list, " << t_build_list;
 
 
 	return 0;
