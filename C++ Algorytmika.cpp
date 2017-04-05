@@ -4,8 +4,9 @@
 #include <math.h>
 #include <fstream>
 #include <random>
+#include <cstdlib>
 
-#define DLUGOSC_LISTY 10000
+#define DLUGOSC_LISTY 50000
 
 using namespace std;
 
@@ -14,6 +15,13 @@ struct lista
 	lista * next;
 	int data;
 };
+
+struct node {
+	node * left;
+	node * right;
+	int data;
+};
+
 
 //Liczenie elementow
 int l_size(lista * p)
@@ -131,6 +139,87 @@ void l_remove(lista * & head, lista * e)
 	}
 }
 
+///Funkcje drzewa
+
+void delete_tree(node * &node)
+{
+	if (node->left)
+	{
+		delete_tree(node->left);
+		node->left = NULL;
+	}
+	if (node->right) {
+		delete_tree(node->right);
+		node->right = NULL;
+	}
+	delete node;
+}
+void print_tree(node * &root) {
+	if (root) {
+		node *p;
+		p = root;
+		cout << " Node : " << p->data << endl;
+		if (p->left) print_tree(p->left);
+		if (p->right) print_tree(p->right);
+		cout << "done" << endl;
+	}
+}
+
+//Wstawianie korzenia
+void t_push_in_root(node * & root, int v) {
+
+	node * p;
+	p = new node;
+	p->data = v;
+	p->left = NULL;
+	p->right = NULL;
+	root = p;
+}
+
+void insert_as_left_son(node * current, int v) {
+	node *leaf;
+	leaf = new node;
+	current->left = leaf;
+	leaf->data = v;
+	leaf->left = leaf->right = NULL;
+}
+
+void insert_as_right_son(node * current, int v) {
+	node * leaf;
+	leaf = new node;
+	current->right = leaf;
+	leaf->data = v;
+	leaf->left = leaf->right = NULL;
+}
+
+//Wstawianie elementu na w³aœciwe miejsce
+void t_insert_elem(node * &root, int v) {
+	node * e;
+	e = root;
+	bool inserted = false;
+	while (!inserted)
+	{
+		if (v < e->data)
+		{
+			if (e->left) e = e->left;
+			else
+			{
+				insert_as_left_son(e, v);
+				inserted = true;
+			}
+		}
+		else
+		{
+			if (e->right) e = e->right;
+			else
+			{
+				insert_as_right_son(e, v);
+				inserted = true;
+			}
+		}
+	}
+}
+
 
 int main()
 {
@@ -141,6 +230,7 @@ int main()
 	lista * L = NULL;
 	clock_t start;
 	double t_build_list = 0, t_search_list = 0, t_del_list = 0;
+	double t_build_tree = 0, t_search_tree = 0, t_del_tree = 0;
 
 	out << "Wyniki dla " << DLUGOSC_LISTY << " elementow" << endl;
 
@@ -226,6 +316,47 @@ int main()
 
 	cout << "Usuniecie listy o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_del_list << " sekund" << endl;
 	out << "t_del_list, " << t_del_list << endl;
+
+
+	//Budowanie drzewa
+
+	start = clock();
+	node * root = NULL;
+	t_push_in_root(root, tab[0]);
+	for (int i = 1; i<DLUGOSC_LISTY; i++)
+	{
+		t_insert_elem(root, tab[i]);
+	}
+	t_build_tree = (clock() - start) / (double)CLOCKS_PER_SEC;
+	cout << "Zbudowanie drzewa o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_build_tree << " sekund" << endl;
+	out << "t_build_tree, " << t_build_tree << endl;
+
+
+	//Szukanie elementów
+
+	start = clock();
+	for (int i = 1; i<DLUGOSC_LISTY; i++)
+	{
+		node * find;
+		find = root;
+		while (find->data != tab[i])
+		{
+			if (find->data > tab[i]) find = find->left;
+			else find = find->right;
+		}
+	}
+	t_search_tree = (clock() - start) / (double)CLOCKS_PER_SEC;
+	cout << "Przeszukanie drzewa o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_search_tree << " sekund" << endl;
+	out << "t_search_tree, " << t_search_tree << endl;
+
+
+	//Usuwanie drzewa
+	start = clock();
+	delete_tree(root);
+	root = NULL;
+	t_del_tree = (clock() - start) / (double)CLOCKS_PER_SEC;
+	cout << "Usuniecie drzewa o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_del_tree << " sekund" << endl;
+	out << "t_del_tree, " << t_del_tree << endl;
 
 
 	return 0;
