@@ -5,7 +5,7 @@
 #include <fstream>
 #include <random>
 
-#define DLUGOSC_LISTY 50000
+#define DLUGOSC_LISTY 10000
 
 using namespace std;
 
@@ -204,7 +204,7 @@ int main()
 	for (int i = 0; i < DLUGOSC_LISTY; i++)
 	{
 		lista *e = L;
-		for (int j = 0; j < i; j++)
+		for (int j = 0; e->data != tab[j]; j++)
 		{
 			e = e->next;
 		}
