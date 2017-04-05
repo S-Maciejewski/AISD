@@ -163,7 +163,7 @@ int main()
 	}
 
 
-	//Wstawianie elementów do listy (z sortowaniem)
+	//Wstawianie elementÃ³w do listy (z sortowaniem)
 
 	start = clock();
 	l_push_back(L, tab[0]);
