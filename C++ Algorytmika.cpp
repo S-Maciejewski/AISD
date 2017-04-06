@@ -282,7 +282,6 @@ int main()
 				l_push_back(L, tab[i]);
 	}
 	t_build_list = (clock() - start) / (double)CLOCKS_PER_SEC;
-	//l_printl(L);
 
 	cout << "Zbudowanie posortowanej listy o dlugosci " << DLUGOSC_LISTY << " zajelo " << t_build_list << " sekund" << endl;
 	out << "t_build_list, " << t_build_list << endl;
@@ -294,7 +293,7 @@ int main()
 	for (int i = 0; i < DLUGOSC_LISTY; i++)
 	{
 		lista *e = L;
-		for (int j = 0; e->data != tab[j]; j++)
+		while (e->data != tab[i])
 		{
 			e = e->next;
 		}
