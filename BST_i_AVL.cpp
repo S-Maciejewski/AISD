@@ -4,11 +4,11 @@
 #include<cstdlib>
 #include <random>
 
-#define DLUGOSC_LISTY 10000
+#define DLUGOSC_LISTY 200
 
 int MAX_HEIGHT = 0;
-long long int tab_avl[DLUGOSC_LISTY];
-long long int counter = 0;
+int tab_avl[DLUGOSC_LISTY];
+int counter = 0;
 
 using namespace std;
 
@@ -141,13 +141,13 @@ int main()
 
 #pragma region Tworzenie listy unikatowych elementów
 	uniform_int_distribution<> distribution(1, DLUGOSC_LISTY * 100);
-	long long int *tab = new long long int[DLUGOSC_LISTY];
+	int *tab = new int[DLUGOSC_LISTY];
 	tab[0] = rand() % (DLUGOSC_LISTY * 10);
-	for (long long int i = 0; i < DLUGOSC_LISTY;)
+	for (int i = 0; i < DLUGOSC_LISTY;)
 	{
-		long long int r = distribution(gen);
+		int r = distribution(gen);
 		bool unique = true;
-		for (long long int j = i; j >= 0; j--)
+		for (int j = i; j >= 0; j--)
 		{
 			if (r == tab[j])
 				unique = false;
@@ -163,7 +163,7 @@ int main()
 #pragma region Budowanie drzewa
 	start = clock();
 	node * root = NULL;
-	for (long long int i = 0; i<DLUGOSC_LISTY; i++)
+	for (int i = 0; i<DLUGOSC_LISTY; i++)
 	{
 		t_insert_elem(root, tab[i]);
 	}
@@ -173,7 +173,7 @@ int main()
 
 #pragma region Szukanie elementów
 	start = clock();
-	for (long long int i = 1; i<DLUGOSC_LISTY; i++)
+	for (int i = 1; i<DLUGOSC_LISTY; i++)
 	{
 		node * find;
 		find = root;
@@ -211,5 +211,6 @@ int main()
 	t_del_tree = (clock() - start) / (double)CLOCKS_PER_SEC;
 	cout << "Czas usuwania drzewa " << t_del_tree << endl;
 #pragma endregion
+
 	return 0;
 }
