@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include<algorithm>
-#define NODE_NUMBER 200
+#define NODE_NUMBER 4000
 
 using namespace std;
 struct node1{
@@ -22,99 +22,60 @@ struct neighbour{
     int node_number;
     neighbour * next_neighbour;
 };
-struct main_node{
-    int node_number;
-    bool visited;
-    main_node * next_main;
-    neighbour * first_neighbour;
-};
-main_node * incidence_list_root = NULL;
-
-void insert_first(int number) {
-    main_node * first = new main_node;
-    first->node_number = number;
-    first->visited = false;
-    first->first_neighbour = NULL;
-    first->next_main = NULL;
-    incidence_list_root = first;
-}
-void insert_next(int number){
-    main_node * e = incidence_list_root, * next = new main_node;
-    while(e->next_main) e = e->next_main;
-    next->node_number = number;
-    next->first_neighbour = NULL;
-    next->next_main = NULL;
-    next->visited = false;
-    e->next_main = next;
-}
-void add_main_node(int node_number) {
-    if(!incidence_list_root) insert_first(node_number);
-    else insert_next(node_number);
-}
-void add_neighbour(int node_number){
-    main_node * last = incidence_list_root;
-    while(last->next_main) last = last->next_main;
-
-    neighbour *node = new neighbour;
+void add_neighbour(neighbour** pointer, int node_number){
+    neighbour* node = new neighbour;
     node->node_number = node_number;
     node->next_neighbour = NULL;
-    if(!last->first_neighbour) last->first_neighbour = node;
-    else{
-        neighbour * last_neighbour = last->first_neighbour;
-        while(last_neighbour->next_neighbour) last_neighbour = last_neighbour->next_neighbour;
-        last_neighbour->next_neighbour = node;
+    if(!*pointer) *pointer = node;
+    else
+    {
+        neighbour * pointer1;
+        pointer1 = *pointer;
+        while(pointer1->next_neighbour) pointer1 = pointer1->next_neighbour;
+        pointer1->next_neighbour = node;
     }
 }
-void print_incidence_list() {
-    main_node * start = incidence_list_root;
-    while(start)
+void print_incidence_list(neighbour ** table_of_list, int dimension) {
+    for(int i=0;i<dimension;i++)
     {
-        cout<<start->node_number<<" : ";
-        neighbour * first = start->first_neighbour;
+        cout<<i<<" : ";
+        neighbour * first = table_of_list[i];
         while(first)
         {
             cout<<first->node_number<<" ";
             first = first->next_neighbour;
         }
         cout<<endl;
-        start = start->next_main;
     }
 }
-
-void make_incidence_list(int **DAG_table, int dimension) {
+void make_incidence_list(int **DAG_table, neighbour* table_of_list[], int dimension) {
     for(int i=0; i<dimension; i++)
     {
-        add_main_node(i);
+        table_of_list[i] = NULL;
         for(int j=0; j<dimension; j++)
         {
-            if(DAG_table[i][j]) add_neighbour(j);
+            if(DAG_table[i][j]) add_neighbour(&table_of_list[i], j);
         }
     }
 }
+void DFS_list(neighbour* table_of_list[], neighbour** pointer, int dimension, bool visited[], int node_number) {
 
-void DFS_list(int node) {
-    main_node * search = incidence_list_root;
-    while(search->node_number != node) search = search->next_main;
-    if(!search->visited)
+    if(!visited[node_number])
     {
-        search->visited = true;
-        neighbour * n = search->first_neighbour;
-        while(n)
-        {
-            DFS_list(n->node_number);
-            n = n->next_neighbour;
+        visited[node_number] = true;
+        if(*pointer) {
+            neighbour *n = *pointer;
+            while (n) {
+                DFS_list(table_of_list, &table_of_list[n->node_number], dimension, visited, n->node_number);
+                n = n->next_neighbour;
+            }
         }
-        insert_element_list(search->node_number);
+        insert_element_list(node_number);
     }
-
 }
-void DAG_incidence_list_Topological_Sort() {
-    main_node * start = incidence_list_root;
-    while(start)
-    {
-            DFS_list(start->node_number);
-            start = start->next_main;
-    }
+void DAG_incidence_list_Topological_Sort(neighbour* table_of_list[], int dimension, bool visited[]) {
+    for(int i=0;i<dimension;i++)
+            DFS_list(table_of_list, &table_of_list[i], dimension, visited, i);
 }
 
 //table
@@ -182,6 +143,7 @@ void DAG_table_generator(int **DAG_table, int dimension) {
         int rand_node2 = rand()%dimension;
         switch_columns(DAG_table, dimension, rand_node1, rand_node2);
     }
+//    print_table(DAG_table, dimension);
 }
 void DFS(int **DAG_table, int n, bool *visited, int current_node) {
     if(!visited[current_node])
@@ -232,13 +194,17 @@ int main() {
 //    cout<<endl;
 
     //generowanie listy incydencji grafu DAG
-    make_incidence_list(DAG_table, n);
-    //print_incidence_list();
+    cout<<"Building list of incidence..."<<endl;
+    neighbour* table_of_list[NODE_NUMBER];
+    make_incidence_list(DAG_table,table_of_list, n);
+    bool DAG_visiting_table_list[n] {false};
 
+    cout<<"Sorting list of incidence..."<<endl;
     //sortowanie topologiczne - lista incydencji
+
     start = clock();
 
-    DAG_incidence_list_Topological_Sort();
+    DAG_incidence_list_Topological_Sort(table_of_list, n, DAG_visiting_table_list);
 
     t_topological_sort_list = (clock() - start) / (double)CLOCKS_PER_SEC;
     cout<<"Lista incydencji dla "<<n<<" elementow : "<<t_topological_sort_list<<endl;
