@@ -7,7 +7,7 @@ using namespace std;
 
 #define NODES 100
 #define SAT 0.3
-#define MAX_WEIGHT 500
+#define MAX_WEIGHT 1000
 #define KROKI 15
 #define PROBY 10
 
