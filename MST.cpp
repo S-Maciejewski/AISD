@@ -217,6 +217,5 @@ int main()
 		cout << endl << size << "\t" << t_matrix <<"\t"<<t_incidence_list<< endl;
 		out << size << "\t" << t_matrix <<"\t"<<t_incidence_list<< endl;
 	}
-
 	return 0;
 }
