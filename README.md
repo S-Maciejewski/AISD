@@ -1,2 +1,2 @@
 # AISD
-Zadanie 3 na AISD, termin - 24/04/2017
+Zadanie 4 na AISD, termin - 15/05/2017
