@@ -5,7 +5,7 @@
 #include <random>
 
 #define nodes 15
-#define sat 0.3
+#define sat 1
 
 using namespace std;
 
@@ -56,6 +56,20 @@ void generate() {
 
 }
 
+void findHamilton(int v)
+{
+	stack[sptr++] = v;
+	for (int i = 0; i < nodes; i++)
+		if (tab[v][i])
+			findHamilton(i);
+	if (sptr == nodes && tab[0][v])	//zakladam, ze punktem poczatkowym jest 0
+	{
+		cout << "Cykl Hamiltona znaleziony" << endl;
+		return;
+	}
+	else
+		stack[--sptr] = -1;
+}
 
 int main()
 {
@@ -87,6 +101,15 @@ int main()
 	cout << "Cykl Eulera :" << endl;
 	for (int i = 0; i < sptr; i++)
 		cout << stack[i] << endl;
+
+
+	delete[] stack;
+	stack = new int[nodes];
+	sptr = 0;
+
+	findHamilton(0);
+
+
 
 	delete[] tab;
 	delete[] stack;
