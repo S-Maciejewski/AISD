@@ -4,8 +4,8 @@
 #include <ctime>
 #include <random>
 
-#define nodes 15
-#define sat 1
+#define nodes 20
+#define sat 0.7
 
 using namespace std;
 
@@ -25,6 +25,39 @@ void findEuler(int v)
 	stack[sptr++] = v;
 }
 
+//Dla multigrafu
+
+//void generate() {
+//	random_device random;
+//	mt19937 gen(random());
+//	uniform_int_distribution<> distribution(0, nodes - 1);
+//
+//	int arcCounter = 0;
+//	for (int i = 0; i < nodes - 1; i++)
+//	{
+//		tab[i][i + 1]++, tab[i + 1][i]++;
+//		arcCounter++;
+//	}
+//
+//	tab[0][nodes - 1]++, tab[nodes - 1][0]++;
+//	arcCounter++;
+//
+//	while (arcCounter < m - 3)
+//	{
+//		int a = 0, b = 0, c = 0;
+//		do
+//		{
+//			a = distribution(gen), b = distribution(gen), c = distribution(gen);
+//		} while (a == b || a == c || b == c);
+//		tab[a][b]++, tab[b][a]++;
+//		tab[b][c]++, tab[c][b]++;
+//		tab[c][a]++, tab[a][c]++;
+//
+//		arcCounter+=3;
+//	}
+//
+//}
+
 void generate() {
 	random_device random;
 	mt19937 gen(random());
@@ -43,17 +76,25 @@ void generate() {
 	while (arcCounter < m - 3)
 	{
 		int a = 0, b = 0, c = 0;
+
 		do
-		{
-			a = distribution(gen), b = distribution(gen), c = distribution(gen);
-		} while (a == b || a == c || b == c);
+			do
+			{
+				a = distribution(gen), b = distribution(gen);
+			} while (a == b);
+		while (tab[a][b] == 1);
+		do
+			do
+				c = distribution(gen);
+			while (c == a || c == b);
+		while (tab[b][c] == 1 || tab[c][a] == 1);
+
 		tab[a][b]++, tab[b][a]++;
 		tab[b][c]++, tab[c][b]++;
 		tab[c][a]++, tab[a][c]++;
 
-		arcCounter+=3;
+		arcCounter += 3;
 	}
-
 }
 
 void findHamilton(int v)
@@ -62,7 +103,7 @@ void findHamilton(int v)
 	for (int i = 0; i < nodes; i++)
 		if (tab[v][i])
 			findHamilton(i);
-	if (sptr == nodes && tab[0][v])	//zakladam, ze punktem poczatkowym jest 0
+	if (sptr == nodes && tab[v][0])	//zakladam, ze punktem poczatkowym jest 0
 	{
 		cout << "Cykl Hamiltona znaleziony" << endl;
 		return;
@@ -100,15 +141,13 @@ int main()
 	//wypisywanie cyklu
 	cout << "Cykl Eulera :" << endl;
 	for (int i = 0; i < sptr; i++)
-		cout << stack[i] << endl;
-
+		cout << stack[i] << ", ";
+	cout << endl;
 
 	delete[] stack;
 	stack = new int[nodes];
 	sptr = 0;
-
 	findHamilton(0);
-
 
 
 	delete[] tab;
