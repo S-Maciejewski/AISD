@@ -1,33 +1,50 @@
-﻿#include "stdafx.h"
 #include <iostream>
 #include <cmath>
 #include <ctime>
 #include <random>
+#include <stack>
 
-#define nodes 170
+#define nodes 4000
 #define sat 0.3
 
 using namespace std;
 
-int m = floor(nodes*(nodes - 1)*sat / 2), sptr = 0;
-int ** tab, * stack;	//stos dla funkcji znajdowania cyklu
-	
+stack<int> usedNodes;    // stacki znacznie fajniejsze od tablic ;)
+stack<int> result;
+int m = int(floor(nodes*(nodes - 1)*sat / 2));
+int resultTableSize = 0;
+int ** tab;	//macierz grafu
 
-void findEuler(int v)
-{
-	for (int i = 0; i < nodes; i++)
-		while (tab[v][i])
-		{
-			tab[v][i]--, tab[i][v]--;
-			findEuler(i);
-		}
-	stack[sptr++] = v;
+int nextPath(int node) {
+    for(int i = 0; i < nodes; i++)
+    {
+        if(tab[node][i]) return i;
+    }
+    return -1;
+}
+void findEuler() {
+    int currentNode = 0;
+    int nextNode;
+    usedNodes.push(currentNode);
+    while(!usedNodes.empty())
+    {
+        if(nextPath(currentNode) != -1)
+        {
+            nextNode = nextPath(currentNode);
+            usedNodes.push(nextNode);
+            tab[currentNode][nextNode]--; tab[nextNode][currentNode]--;
+            currentNode = nextNode;
+        }
+        else
+        {
+            result.push(currentNode);
+            usedNodes.pop();
+            if(!usedNodes.empty()) currentNode = usedNodes.top();
+        }
+    }
 }
 
 void generate() {
-	random_device random;
-	mt19937 gen(random());
-	uniform_int_distribution<> distribution(0, nodes - 1);
 
 	int arcCounter = 0;
 	for (int i = 0; i < nodes - 1; i++)
@@ -39,25 +56,17 @@ void generate() {
 	tab[0][nodes - 1]++, tab[nodes - 1][0]++;
 	arcCounter++;
 
-	while (arcCounter < m - 3)
-	{
-		int a = 0, b = 0, c = 0;
+	while (arcCounter <= m - 3) {
+        int a = 0, b = 0, c = 0;
+        a = rand() % nodes, b = rand() % nodes;
+        while (tab[a][b] == 1 || a == b){
+                a = rand() % nodes, b = rand() % nodes;
+        }
 
-		do
-			do
-			{
-				a = distribution(gen), b = distribution(gen);
-				//cout << "a, b generated" << endl;
-			} while (a == b);
-		while (tab[a][b] == 1);
-		do
-			do
-			{
-				c = distribution(gen);
-				//cout << "c generated" << endl;
-			}
-			while (c == a || c == b);
-		while (tab[b][c] == 1 || tab[c][a] == 1);
+        c = rand()%nodes;
+		while( (c==a || c==b) || (tab[b][c] == 1 || tab[c][a] == 1) ) {
+                c = rand() % nodes;
+        }
 
 		tab[a][b]++, tab[b][a]++;
 		tab[b][c]++, tab[c][b]++;
@@ -66,41 +75,46 @@ void generate() {
 		arcCounter += 3;
 	}
 
-	for (int i = 0; i < nodes*2; i++) 
+    //zamiana wierzchołków
+	for (int i = 0; i < nodes*2; i++)
 	{
-		int randNode1 = distribution(gen);
-		int randNode2 = distribution(gen);
-		for (int i = 0; i<nodes; i++) swap(tab[randNode1][i], tab[randNode2][i]);
-		for (int i = 0; i<nodes; i++) swap(tab[i][randNode1], tab[i][randNode2]);
+		int randNode1 = rand()%nodes;
+		int randNode2 = rand()%nodes;
+        while(randNode1 == randNode2){
+            randNode2 = rand()%nodes;
+        }
+		for (int k = 0; k<nodes; k++) swap(tab[randNode1][k], tab[randNode2][k]);
+		for (int j = 0; j<nodes; j++) swap(tab[j][randNode1], tab[j][randNode2]);
 	}
 
+    resultTableSize = arcCounter+1;  //zmienna resultTableSize jest zawsze o 1 większa
+    // od arcCounter, więc żeby bez sensu nie zliczac jest obliczona tutaj, trochę to skraca czas działania
 	cout << endl << "Graph generated successfully" << endl;
-	cout << "Edge amount: " << arcCounter << endl;
+	cout << "Edge amount: " << arcCounter <<" "<<m<< endl << endl;
 }
 
-void findHamilton(int v)
-{
-	stack[sptr++] = v;
-	for (int i = 0; i < nodes; i++)
-		if (tab[v][i])
-			findHamilton(i);
-	if (sptr == nodes && tab[v][0])	//zakladam, ze punktem poczatkowym jest 0
-	{
-		cout << "Cykl Hamiltona znaleziony" << endl;
-		return;
-	}
-	else
-		stack[--sptr] = -1;
-}
+//void findHamilton(int v)
+//{
+//	stack[sptr++] = v;
+//	for (int i = 0; i < nodes; i++)
+//		if (tab[v][i])
+//			findHamilton(i);
+//	if (sptr == nodes && tab[v][0])	//zakladam, ze punktem poczatkowym jest 0
+//	{
+//		cout << "Cykl Hamiltona znaleziony" << endl;
+//		return;
+//	}
+//	else
+//		stack[--sptr] = -1;
+//}
 
 int main()
 {
 	time_t start;
-	double eulerTime = 0, hamiltonTime = 0;
+    srand(time(NULL));   //dałem zwykłego randa, bo i tak nie wychodzimy poza 10000
+	double eulerTime = 0/*, hamiltonTime = 0*/;
 
-	tab = new int *[nodes];            
-	stack = new int[m];
-
+	tab = new int *[nodes];
 	for (int i = 0; i < nodes; i++)
 	{
 		tab[i] = new int[nodes];
@@ -109,37 +123,43 @@ int main()
 	}
 		     
 	generate();
-
-	////wypisywanie tabeli
-	//for (int i = 0; i < nodes; i++)
-	//{
-	//	for (int j = 0; j < nodes; j++)
-	//	{
-	//		cout << tab[i][j] << ", ";
-	//	}
-	//	cout << endl;
-	//}
+//    wypisywanie tabeli
+//	for (int i = 0; i < nodes; i++)
+//	{
+//		for (int j = 0; j < nodes; j++)
+//		{
+//			cout << tab[i][j] << ", ";
+//		}
+//		cout << endl;
+//	}
+//    cout<<endl;
+//    wypisywanie krawędzi
+//    for (int i = 0; i < nodes; i++)
+//    {
+//        cout<<i<<" : ";
+//        for (int j = 0; j < nodes; j++)
+//        {
+//            if(tab[i][j]) cout<<j<<" ";
+//        }
+//        cout << endl;
+//    }
 
 	start = clock();
-	findEuler(0);
+	findEuler();
 	eulerTime = (clock() - start) / (double)CLOCKS_PER_SEC;
 
+// 	  wypisywanie cyklu (w kolejności odwrotnej jakby co, ale cykl to cykl)
+//    cout << "Cykl Eulera : ";
+//    while(!result.empty())
+//    {
+//        cout<<result.top()<<", ";
+//        result.pop();
+//    }
+    cout << endl << "Czas dzialania eulera: " << eulerTime << endl;
 
-	//wypisywanie cyklu
-	cout << "Cykl Eulera :" << endl;
-	for (int i = 0; i < sptr; i++)
-		cout << stack[i] << ", ";
-
-	cout << endl << "Czas dzialania: " << eulerTime << endl;
-
-	delete[] stack;
-	stack = new int[nodes];
-	sptr = 0;
-	findHamilton(0);
-
-
+//    findHamilton(0);
+    
 	delete[] tab;
-	delete[] stack;
 
 
 	return 0;
