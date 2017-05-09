@@ -4,8 +4,8 @@
 #include <ctime>
 #include <random>
 
-#define nodes 20
-#define sat 0.7
+#define nodes 170
+#define sat 0.3
 
 using namespace std;
 
@@ -47,14 +47,14 @@ void generate() {
 			do
 			{
 				a = distribution(gen), b = distribution(gen);
-				cout << "a, b generated" << endl;
+				//cout << "a, b generated" << endl;
 			} while (a == b);
 		while (tab[a][b] == 1);
 		do
 			do
 			{
 				c = distribution(gen);
-				cout << "c generated" << endl;
+				//cout << "c generated" << endl;
 			}
 			while (c == a || c == b);
 		while (tab[b][c] == 1 || tab[c][a] == 1);
@@ -65,8 +65,17 @@ void generate() {
 
 		arcCounter += 3;
 	}
+
+	for (int i = 0; i < nodes*2; i++) 
+	{
+		int randNode1 = distribution(gen);
+		int randNode2 = distribution(gen);
+		for (int i = 0; i<nodes; i++) swap(tab[randNode1][i], tab[randNode2][i]);
+		for (int i = 0; i<nodes; i++) swap(tab[i][randNode1], tab[i][randNode2]);
+	}
+
 	cout << endl << "Graph generated successfully" << endl;
-	cout << "Edge amound: " << arcCounter << endl;
+	cout << "Edge amount: " << arcCounter << endl;
 }
 
 void findHamilton(int v)
@@ -101,15 +110,15 @@ int main()
 		     
 	generate();
 
-	//wypisywanie tabeli
-	for (int i = 0; i < nodes; i++)
-	{
-		for (int j = 0; j < nodes; j++)
-		{
-			cout << tab[i][j] << ", ";
-		}
-		cout << endl;
-	}
+	////wypisywanie tabeli
+	//for (int i = 0; i < nodes; i++)
+	//{
+	//	for (int j = 0; j < nodes; j++)
+	//	{
+	//		cout << tab[i][j] << ", ";
+	//	}
+	//	cout << endl;
+	//}
 
 	start = clock();
 	findEuler(0);
