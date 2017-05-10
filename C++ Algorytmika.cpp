@@ -4,16 +4,20 @@
 #include <random>
 #include <stack>
 
-#define nodes 4000
+#define nodes 100
 #define sat 0.3
 
 using namespace std;
 
 stack<int> usedNodes;    // stacki znacznie fajniejsze od tablic ;)
-stack<int> result;
+stack<int> resultEuler;
+stack<int> resultHamilton;
 int m = int(floor(nodes*(nodes - 1)*sat / 2));
-int resultTableSize = 0;
+int visited[nodes] {false};
+bool hamiltonFound = false;
+
 int ** tab;	//macierz grafu
+int ** tab1;
 
 int nextPath(int node) {
     for(int i = 0; i < nodes; i++)
@@ -37,7 +41,7 @@ void findEuler() {
         }
         else
         {
-            result.push(currentNode);
+            resultEuler.push(currentNode);
             usedNodes.pop();
             if(!usedNodes.empty()) currentNode = usedNodes.top();
         }
@@ -69,8 +73,8 @@ void generate() {
         }
 
 		tab[a][b]++, tab[b][a]++;
-		tab[b][c]++, tab[c][b]++;
-		tab[c][a]++, tab[a][c]++;
+        tab[b][c]++, tab[c][b]++;
+        tab[c][a]++, tab[a][c]++;
 
 		arcCounter += 3;
 	}
@@ -87,42 +91,54 @@ void generate() {
 		for (int j = 0; j<nodes; j++) swap(tab[j][randNode1], tab[j][randNode2]);
 	}
 
-    resultTableSize = arcCounter+1;  //zmienna resultTableSize jest zawsze o 1 większa
-    // od arcCounter, więc żeby bez sensu nie zliczac jest obliczona tutaj, trochę to skraca czas działania
 	cout << endl << "Graph generated successfully" << endl;
 	cout << "Edge amount: " << arcCounter <<" "<<m<< endl << endl;
 }
 
-//void findHamilton(int v)
-//{
-//	stack[sptr++] = v;
-//	for (int i = 0; i < nodes; i++)
-//		if (tab[v][i])
-//			findHamilton(i);
-//	if (sptr == nodes && tab[v][0])	//zakladam, ze punktem poczatkowym jest 0
-//	{
-//		cout << "Cykl Hamiltona znaleziony" << endl;
-//		return;
-//	}
-//	else
-//		stack[--sptr] = -1;
-//}
+void findHamilton(int v) {
+    visited[v] = true;
+	resultHamilton.push(v);
+	for (int i = 0; i < nodes; i++)
+		if (tab1[v][i] && !visited[i]) {
+            tab1[v][i]--; tab1[i][v]--;
+            findHamilton(i);
+            if(hamiltonFound) return;
+            tab1[v][i]++; tab1[i][v]++;
+        }
+
+	if (resultHamilton.size() == nodes && tab1[v][0]){
+        resultHamilton.push(0);
+        hamiltonFound = true;
+		return;
+	}
+	else {
+        resultHamilton.pop();
+        visited[v] = false;
+    }
+}
 
 int main()
 {
 	time_t start;
     srand(time(NULL));   //dałem zwykłego randa, bo i tak nie wychodzimy poza 10000
-	double eulerTime = 0/*, hamiltonTime = 0*/;
+	double eulerTime = 0, hamiltonTime = 0;
 
-	tab = new int *[nodes];
-	for (int i = 0; i < nodes; i++)
-	{
-		tab[i] = new int[nodes];
-		for (int j = 0; j < nodes; j++) 
-			tab[i][j] = 0;
-	}
-		     
+    tab = new int *[nodes];
+    for (int i = 0; i < nodes; i++)
+    {
+        tab[i] = new int[nodes];
+        for (int j = 0; j < nodes; j++)
+            tab[i][j] = 0;
+    }
 	generate();
+    tab1 = new int *[nodes];
+    for (int i = 0; i < nodes; i++)
+    {
+        tab1[i] = new int[nodes];
+        for (int j = 0; j < nodes; j++)
+            tab1[i][j] = tab[i][j];
+    }
+
 //    wypisywanie tabeli
 //	for (int i = 0; i < nodes; i++)
 //	{
@@ -134,15 +150,15 @@ int main()
 //	}
 //    cout<<endl;
 //    wypisywanie krawędzi
-//    for (int i = 0; i < nodes; i++)
-//    {
-//        cout<<i<<" : ";
-//        for (int j = 0; j < nodes; j++)
-//        {
-//            if(tab[i][j]) cout<<j<<" ";
-//        }
-//        cout << endl;
-//    }
+    for (int i = 0; i < nodes; i++)
+    {
+        cout<<i<<" : ";
+        for (int j = 0; j < nodes; j++)
+        {
+            if(tab[i][j]) cout<<j<<" ";
+        }
+        cout << endl;
+    }
 
 	start = clock();
 	findEuler();
@@ -150,16 +166,21 @@ int main()
 
 // 	  wypisywanie cyklu (w kolejności odwrotnej jakby co, ale cykl to cykl)
 //    cout << "Cykl Eulera : ";
-//    while(!result.empty())
+//    while(!resultEuler.empty())
 //    {
-//        cout<<result.top()<<", ";
-//        result.pop();
+//        cout<<resultEuler.top()<<", ";
+//        resultEuler.pop();
 //    }
     cout << endl << "Czas dzialania eulera: " << eulerTime << endl;
 
-//    findHamilton(0);
-    
+    start = clock();
+    findHamilton(0);
+    hamiltonTime = (clock() - start) / (double)CLOCKS_PER_SEC;
+    cout << endl << "Czas dzialania hamiltona: " << hamiltonTime << endl;
+
+
 	delete[] tab;
+    delete[] tab1;
 
 
 	return 0;
