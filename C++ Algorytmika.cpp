@@ -24,10 +24,13 @@ bool hamiltonFound = false;
 int ** eulerGraph;	
 int ** hamiltonGraph;
 
-void setGlobal(int stp)
+void setGlobal(int nodeAmount)
 {
-	edges = int(floor(nodes + step*stp*(nodes + step*stp - 1)*sat / 2));
-	visited = new int[nodes + step*stp]{ false };
+	edges = int(floor(nodeAmount*(nodeAmount - 1)*sat / 2));
+	//visited = new int[nodeAmount]{ false };
+	visited = new int[nodeAmount];
+	for (int i = 0; i < nodeAmount; i++)
+		visited[i] = false;
 }
 
 void generate() {
@@ -73,8 +76,8 @@ void generate() {
 		for (int j = 0; j<nodes; j++) swap(eulerGraph[j][randNode1], eulerGraph[j][randNode2]);
 	}
 
-	//cout << endl << "Graph generated successfully" << endl;
-	//cout << "Edge amount: " << arcCounter << " " << edges << endl << endl;
+	cout << endl << "Graph generated successfully" << endl;
+	cout << "Edge amount: " << arcCounter << " " << edges << endl << endl;
 }
 
 int nextPath(int node) {
@@ -134,30 +137,32 @@ int main()
 	time_t start;
 	srand(time(NULL));
 	double eulerTime = 0, hamiltonTime = 0;
-	short int eulerMultiplier = 10, hamiltonMultiplier = 2;
+	short int eulerMultiplier = 10, hamiltonMultiplier = 4;
 	ofstream out ("wyniki.txt");
 	out << "nodes, eulerTime, hamiltonTime" << endl;
 
 	for (int stepNumber = 0; stepNumber < steps; stepNumber++)
 	{
-		setGlobal(stepNumber);
+		int nodesActually = nodes + stepNumber*step;
+
+		setGlobal(nodesActually);
 		for (int repeatNumber = 0; repeatNumber < repeats; repeatNumber++)
 		{
-			eulerGraph = new int *[nodes*+stepNumber*step];
-			for (int i = 0; i < nodes*+stepNumber*step; i++)
+			eulerGraph = new int *[nodesActually];
+			for (int i = 0; i < nodesActually; i++)
 			{
-				eulerGraph[i] = new int[nodes*+stepNumber*step];
-				for (int j = 0; j < nodes*+stepNumber*step; j++)
+				eulerGraph[i] = new int[nodesActually];
+				for (int j = 0; j < nodesActually; j++)
 					eulerGraph[i][j] = 0;
 			}
 
 			generate();
 
-			hamiltonGraph = new int *[nodes*+stepNumber*step];
-			for (int i = 0; i < nodes*+stepNumber*step; i++)
+			hamiltonGraph = new int *[nodesActually];
+			for (int i = 0; i < nodesActually; i++)
 			{
-				hamiltonGraph[i] = new int[nodes*+stepNumber*step];
-				for (int j = 0; j < nodes*+stepNumber*step; j++)
+				hamiltonGraph[i] = new int[nodesActually];
+				for (int j = 0; j < nodesActually; j++)
 					hamiltonGraph[i][j] = eulerGraph[i][j];
 			}
 
@@ -178,10 +183,10 @@ int main()
 
 		eulerTime /= repeats;
 		hamiltonTime /= repeats;
-		cout << endl << "Euler time for " << nodes*+stepNumber*step << " nodes : " << eulerTime << endl;
-		cout << endl << "Hamilton time for " << nodes*+stepNumber*step << " nodes : " << hamiltonTime << endl;
+		cout << endl << "Euler time for " << nodesActually << " nodes : " << eulerTime << endl;
+		cout << endl << "Hamilton time for " << nodesActually << " nodes : " << hamiltonTime << endl;
 
-		out << nodes*+stepNumber*step << ", " << eulerTime << ", " << hamiltonTime << endl;
+		out << nodesActually << ", " << eulerTime << ", " << hamiltonTime << endl;
 	}
 
 	return 0;
