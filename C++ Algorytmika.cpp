@@ -230,6 +230,12 @@ int main()
 			findHamilton(0);
 			hamiltonTime = (clock() - start) / (double)CLOCKS_PER_SEC;
 
+			for (int i = 0; i < nodesActually; i++)
+			{
+				delete eulerGraph[i];
+				delete hamiltonGraph[i];
+			}
+
 			delete eulerGraph;
 			delete hamiltonGraph;
 		}
