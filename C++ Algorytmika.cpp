@@ -10,18 +10,18 @@
 #define sat 0.3
 #define steps 15
 #define step 10
-#define repeats 5
+#define repeats 10
 
 using namespace std;
 
-stack<int> usedNodes; 
+stack<int> usedNodes;
 stack<int> resultEuler;
 stack<int> resultHamilton;
 int edges;
 int *visited;
 bool hamiltonFound = false;
 
-int ** eulerGraph;	
+int ** eulerGraph;
 int ** hamiltonGraph;
 
 void setGlobal(int nodeAmount)
@@ -33,8 +33,55 @@ void setGlobal(int nodeAmount)
 		visited[i] = false;
 }
 
-void generate() {
+//void generate() {
+//
+//	int arcCounter = 0;
+//	for (int i = 0; i < nodes - 1; i++)
+//	{
+//		eulerGraph[i][i + 1]++, eulerGraph[i + 1][i]++;
+//		arcCounter++;
+//	}
+//
+//	eulerGraph[0][nodes - 1]++, eulerGraph[nodes - 1][0]++;
+//	arcCounter++;
+//
+//	while (arcCounter <= edges - 3) {
+//		int a = 0, b = 0, c = 0;
+//		a = rand() % nodes, b = rand() % nodes;
+//		while (eulerGraph[a][b] == 1 || a == b) {
+//			a = rand() % nodes, b = rand() % nodes;
+//		}
+//
+//		c = rand() % nodes;
+//		while ((c == a || c == b) || (eulerGraph[b][c] == 1 || eulerGraph[c][a] == 1)) {
+//			c = rand() % nodes;
+//		}
+//
+//		eulerGraph[a][b]++, eulerGraph[b][a]++;
+//		eulerGraph[b][c]++, eulerGraph[c][b]++;
+//		eulerGraph[c][a]++, eulerGraph[a][c]++;
+//
+//		arcCounter += 3;
+//	}
+//
+//	//zamiana wierzchołków
+//	for (int i = 0; i < nodes * 2; i++)
+//	{
+//		int randNode1 = rand() % nodes;
+//		int randNode2 = rand() % nodes;
+//		while (randNode1 == randNode2) {
+//			randNode2 = rand() % nodes;
+//		}
+//		for (int k = 0; k<nodes; k++) swap(eulerGraph[randNode1][k], eulerGraph[randNode2][k]);
+//		for (int j = 0; j<nodes; j++) swap(eulerGraph[j][randNode1], eulerGraph[j][randNode2]);
+//	}
+//
+//	cout << endl << "Graph generated successfully" << endl;
+//	cout << "Edge amount: " << arcCounter << " " << edges << endl << endl;
+//}
 
+void generate() {
+	cout << "Generating graph... ";
 	int arcCounter = 0;
 	for (int i = 0; i < nodes - 1; i++)
 	{
@@ -45,16 +92,57 @@ void generate() {
 	eulerGraph[0][nodes - 1]++, eulerGraph[nodes - 1][0]++;
 	arcCounter++;
 
-	while (arcCounter <= edges - 3) {
-		int a = 0, b = 0, c = 0;
-		a = rand() % nodes, b = rand() % nodes;
-		while (eulerGraph[a][b] == 1 || a == b) {
-			a = rand() % nodes, b = rand() % nodes;
-		}
+	cout << "... ";
 
-		c = rand() % nodes;
-		while ((c == a || c == b) || (eulerGraph[b][c] == 1 || eulerGraph[c][a] == 1)) {
+	while (arcCounter <= edges - 3)
+	{
+		int a, b, c, loops, loopBreaker;
+		bool generationError = true;
+		while (generationError)
+		{
+			a = 0, b = 0, c = 0, loops = 0, loopBreaker = 0;
+			generationError = false;
+
+			a = rand() % nodes, b = rand() % nodes;
+
+			while (eulerGraph[a][b] == 1 || a == b) {
+				if (loops > nodes)
+				{
+					a = loopBreaker++;
+					for (int j = 0; j < nodes; j++)
+					{
+						b = j;
+						if (eulerGraph[a][b] != 1 && a != b) break;
+					}
+				}
+				else
+				{
+					a = rand() % nodes, b = rand() % nodes;
+					loops++;
+				}
+				//cout << "a, b generated" << endl;
+			}
+
 			c = rand() % nodes;
+			while ((c == a || c == b) || (eulerGraph[b][c] == 1 || eulerGraph[c][a] == 1))
+			{
+				if (loops > nodes)
+				{
+					c = loopBreaker++;
+					if (loopBreaker >= nodes)
+					{
+						generationError = true;
+						cout << "				GENERATION ERROR" << endl;
+						break;
+					}
+				}
+				else
+				{
+					c = rand() % nodes;
+					loops++;
+				}
+				//cout << "c generated" << endl;
+			}
 		}
 
 		eulerGraph[a][b]++, eulerGraph[b][a]++;
@@ -63,7 +151,7 @@ void generate() {
 
 		arcCounter += 3;
 	}
-
+	cout << "... ";
 
 	for (int i = 0; i < nodes * nodes; i++)
 	{
@@ -76,8 +164,8 @@ void generate() {
 		for (int j = 0; j<nodes; j++) swap(eulerGraph[j][randNode1], eulerGraph[j][randNode2]);
 	}
 
-	cout << endl << "Graph generated successfully" << endl;
-	cout << "Edge amount: " << arcCounter << " " << edges << endl << endl;
+	cout << "...graph generated successfully" << endl;
+	//cout << "Edge amount: " << arcCounter << " " << edges << endl << endl;
 }
 
 int nextPath(int node) {
@@ -137,11 +225,10 @@ int main()
 	time_t start;
 	srand(time(NULL));
 	double eulerTime = 0, hamiltonTime = 0;
-	short int eulerMultiplier = 10, hamiltonMultiplier = 4;
-	ofstream out ("wyniki.txt");
+	ofstream out("wyniki.txt");
 	out << "nodes, eulerTime, hamiltonTime" << endl;
 
-	for (int stepNumber = 0; stepNumber < steps; stepNumber++)
+	for (int stepNumber = 0; stepNumber <= steps; stepNumber++)
 	{
 		int nodesActually = nodes + stepNumber*step;
 
@@ -168,21 +255,19 @@ int main()
 
 
 			start = clock();
-			for(short int i=0;i<eulerMultiplier;i++)
-				findEuler();
-			eulerTime = ((clock() - start) / (double)CLOCKS_PER_SEC) / (double)eulerMultiplier;
+			findEuler();
+			eulerTime = ((clock() - start) / (double)CLOCKS_PER_SEC);
 
 			start = clock();
-			for (short int i = 0; i<hamiltonMultiplier; i++)
-				findHamilton(0);
-			hamiltonTime = (clock() - start) / (double)CLOCKS_PER_SEC / (double)hamiltonMultiplier;
+			findHamilton(0);
+			hamiltonTime = (clock() - start) / (double)CLOCKS_PER_SEC;
 
 			delete[] eulerGraph;
 			delete[] hamiltonGraph;
 		}
 
-		eulerTime /= repeats;
-		hamiltonTime /= repeats;
+		eulerTime /= (double)repeats;
+		hamiltonTime /= (double)repeats;
 		cout << endl << "Euler time for " << nodesActually << " nodes : " << eulerTime << endl;
 		cout << endl << "Hamilton time for " << nodesActually << " nodes : " << hamiltonTime << endl;
 
