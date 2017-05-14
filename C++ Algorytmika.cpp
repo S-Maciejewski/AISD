@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
-#include <random>
 #include <stack>
 #include <fstream>
 
@@ -10,7 +9,7 @@
 #define sat 0.3
 #define steps 15
 #define step 10
-#define repeats 10
+#define repeats 1
 
 using namespace std;
 
@@ -146,7 +145,8 @@ void findHamilton(int v, int nodesActually) {
 	visited[v] = true;
 	resultHamilton.push(v);
 	for (int i = 0; i < nodesActually; i++)
-		if (hamiltonGraph[v][i] && !visited[i]) {
+		if (hamiltonGraph[v][i] && !visited[i]) 
+		{
 			hamiltonGraph[v][i]--; hamiltonGraph[i][v]--;
 			findHamilton(i, nodesActually);
 			if (hamiltonFound) return;
@@ -186,6 +186,7 @@ int main()
 		double eulerTime = 0, hamiltonTime = 0;
 
 		setGlobal(nodesActually);
+
 		for (int repeatNumber = 0; repeatNumber < repeats; repeatNumber++)
 		{
 			eulerTime = 0, hamiltonTime = 0;
@@ -227,13 +228,15 @@ int main()
 				delete eulerGraph[i];
 				delete hamiltonGraph[i];
 			}
-			for (int i = 0; i < usedNodes.size(); i++) usedNodes.pop();
-			for (int i = 0; i < resultEuler.size(); i++) resultEuler.pop();
-			for (int i = 0; i < resultHamilton.size(); i++) resultHamilton.pop();
+
+			while (!usedNodes.empty()) usedNodes.pop();
+			while (!resultEuler.empty()) resultEuler.pop();
+			while (!resultHamilton.empty()) resultHamilton.pop();
 
 
 			delete eulerGraph;
 			delete hamiltonGraph;
+			for (int i = 0; i < nodesActually; i++) visited[i] = false;
 
 
 		}
