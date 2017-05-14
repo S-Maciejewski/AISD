@@ -32,12 +32,9 @@ void setGlobal(int nodeAmount)
 	for (int i = 0; i < nodeAmount; i++)
 		visited[i] = false;
 	hamiltonFound = false;
-	cout << endl << "Globals set on : " << nodeAmount << " nodes and : " << edges << " edges." << endl;
 }
 
 void generate(int nodesActually) {
-	cout << "Generating graph... ";
-
 	int arcCounter = 0;
 	for (int i = 0; i < nodesActually - 1; i++)
 	{
@@ -48,7 +45,6 @@ void generate(int nodesActually) {
 	eulerGraph[0][nodesActually - 1]++, eulerGraph[nodesActually - 1][0]++;
 	arcCounter++;
 
-	cout << "... ";
 
 	while (arcCounter <= edges - 3)
 	{
@@ -76,7 +72,6 @@ void generate(int nodesActually) {
 					a = rand() % nodesActually, b = rand() % nodesActually;
 					loops++;
 				}
-				//cout << "a, b generated" << endl;
 			}
 
 			c = rand() % nodesActually;
@@ -88,7 +83,6 @@ void generate(int nodesActually) {
 					if (loopBreaker >= nodesActually)
 					{
 						generationError = true;
-						//cout << "				GENERATION ERROR" << endl;
 						break;
 					}
 				}
@@ -97,7 +91,6 @@ void generate(int nodesActually) {
 					c = rand() % nodesActually;
 					loops++;
 				}
-				//cout << "c generated" << endl;
 			}
 		}
 
@@ -107,21 +100,16 @@ void generate(int nodesActually) {
 
 		arcCounter += 3;
 	}
-	cout << "... ";
 
 	for (int i = 0; i < nodesActually * nodesActually; i++)
 	{
 		int randNode1 = rand() % nodesActually;
 		int randNode2 = rand() % nodesActually;
-		while (randNode1 == randNode2) {
+		while (randNode1 == randNode2)
 			randNode2 = rand() % nodesActually;
-		}
 		for (int k = 0; k<nodesActually; k++) swap(eulerGraph[randNode1][k], eulerGraph[randNode2][k]);
 		for (int j = 0; j<nodesActually; j++) swap(eulerGraph[j][randNode1], eulerGraph[j][randNode2]);
 	}
-
-	cout << "...graph generated successfully" << endl;
-	//cout << "Edge amount: " << arcCounter << " " << edges << endl << endl;
 }
 
 int nextPath(int node, int nodesActually) {
@@ -201,7 +189,6 @@ int main()
 		for (int repeatNumber = 0; repeatNumber < repeats; repeatNumber++)
 		{
 			eulerTime = 0, hamiltonTime = 0;
-
 			eulerGraph = new int *[nodesActually];
 			for (int i = 0; i < nodesActually; i++)
 			{
@@ -217,6 +204,7 @@ int main()
 			hamiltonGraph = new int *[nodesActually];
 			for (int i = 0; i < nodesActually; i++)
 			{
+				visited[i] = false;
 				hamiltonGraph[i] = new int[nodesActually];
 				for (int j = 0; j < nodesActually; j++)
 					hamiltonGraph[i][j] = eulerGraph[i][j];
@@ -229,7 +217,7 @@ int main()
 			eulerTime += ((clock() - start) / (double)CLOCKS_PER_SEC);
 
 
-			cout << "Searching for Hamilton"<<endl;
+			cout << "Searching for Hamilton" << endl;
 			start = clock();
 			findHamilton(0, nodesActually);
 			hamiltonTime += (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -247,7 +235,7 @@ int main()
 			delete eulerGraph;
 			delete hamiltonGraph;
 
-			
+
 		}
 
 		eulerTime /= (double)repeats;
