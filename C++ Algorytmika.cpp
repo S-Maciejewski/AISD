@@ -5,11 +5,11 @@
 #include <stack>
 #include <fstream>
 
-#define nodes 10
+#define nodes 20
 #define sat 0.3
 #define steps 15
-#define step 5
-#define repeats 5
+#define step 2
+#define repeats 10
 
 using namespace std;
 
@@ -34,6 +34,84 @@ void setGlobal(int nodeAmount)
 	hamiltonFound = false;
 }
 
+//void generate(int nodesActually) {
+//	int arcCounter = 0;
+//	for (int i = 0; i < nodesActually - 1; i++)
+//	{
+//		eulerGraph[i][i + 1]++, eulerGraph[i + 1][i]++;
+//		arcCounter++;
+//	}
+//
+//	eulerGraph[0][nodesActually - 1]++, eulerGraph[nodesActually - 1][0]++;
+//	arcCounter++;
+//
+//
+//	while (arcCounter <= edges - 3)
+//	{
+//		int a, b, c, loops, loopBreaker;
+//		bool generationError = true;
+//		while (generationError)
+//		{
+//			a = 0, b = 0, c = 0, loops = 0, loopBreaker = 0;
+//			generationError = false;
+//
+//			a = rand() % nodesActually, b = rand() % nodesActually;
+//
+//			while (eulerGraph[a][b] == 1 || a == b) {
+//				if (loops > nodesActually)
+//				{
+//					a = loopBreaker++;
+//					for (int j = 0; j < nodesActually; j++)
+//					{
+//						b = j;
+//						if (eulerGraph[a][b] != 1 && a != b) break;
+//					}
+//				}
+//				else
+//				{
+//					a = rand() % nodesActually, b = rand() % nodesActually;
+//					loops++;
+//				}
+//			}
+//
+//			c = rand() % nodesActually;
+//			while ((c == a || c == b) || (eulerGraph[b][c] == 1 || eulerGraph[c][a] == 1))
+//			{
+//				if (loops > nodesActually)
+//				{
+//					c = loopBreaker++;
+//					if (loopBreaker >= nodesActually)
+//					{
+//						generationError = true;
+//						break;
+//					}
+//				}
+//				else
+//				{
+//					c = rand() % nodesActually;
+//					loops++;
+//				}
+//			}
+//		}
+//
+//		eulerGraph[a][b]++, eulerGraph[b][a]++;
+//		eulerGraph[b][c]++, eulerGraph[c][b]++;
+//		eulerGraph[c][a]++, eulerGraph[a][c]++;
+//
+//		arcCounter += 3;
+//	}
+//
+//	for (int i = 0; i < nodesActually * nodesActually; i++)
+//	{
+//		int randNode1 = rand() % nodesActually;
+//		int randNode2 = rand() % nodesActually;
+//		while (randNode1 == randNode2)
+//			randNode2 = rand() % nodesActually;
+//		for (int k = 0; k<nodesActually; k++) swap(eulerGraph[randNode1][k], eulerGraph[randNode2][k]);
+//		for (int j = 0; j<nodesActually; j++) swap(eulerGraph[j][randNode1], eulerGraph[j][randNode2]);
+//	}
+//}
+
 void generate(int nodesActually) {
 	int arcCounter = 0;
 	for (int i = 0; i < nodesActually - 1; i++)
@@ -45,54 +123,22 @@ void generate(int nodesActually) {
 	eulerGraph[0][nodesActually - 1]++, eulerGraph[nodesActually - 1][0]++;
 	arcCounter++;
 
+	int	a = 0, b = 0, c = 0;
 
 	while (arcCounter <= edges - 3)
 	{
-		int a, b, c, loops, loopBreaker;
-		bool generationError = true;
-		while (generationError)
-		{
-			a = 0, b = 0, c = 0, loops = 0, loopBreaker = 0;
-			generationError = false;
-
 			a = rand() % nodesActually, b = rand() % nodesActually;
 
-			while (eulerGraph[a][b] == 1 || a == b) {
-				if (loops > nodesActually)
-				{
-					a = loopBreaker++;
-					for (int j = 0; j < nodesActually; j++)
-					{
-						b = j;
-						if (eulerGraph[a][b] != 1 && a != b) break;
-					}
-				}
-				else
-				{
+			while (eulerGraph[a][b] == 1 || a == b)
+			{
 					a = rand() % nodesActually, b = rand() % nodesActually;
-					loops++;
-				}
 			}
 
 			c = rand() % nodesActually;
 			while ((c == a || c == b) || (eulerGraph[b][c] == 1 || eulerGraph[c][a] == 1))
 			{
-				if (loops > nodesActually)
-				{
-					c = loopBreaker++;
-					if (loopBreaker >= nodesActually)
-					{
-						generationError = true;
-						break;
-					}
-				}
-				else
-				{
 					c = rand() % nodesActually;
-					loops++;
-				}
 			}
-		}
 
 		eulerGraph[a][b]++, eulerGraph[b][a]++;
 		eulerGraph[b][c]++, eulerGraph[c][b]++;
@@ -145,18 +191,19 @@ void findEuler(int nodesActually) {
 void findHamilton(int v, int nodesActually) {
 	visited[v] = true;
 	resultHamilton.push(v);
-	for (int i = 0; i < nodesActually; i++)
-		if (hamiltonGraph[v][i] && !visited[i]) 
-		{
-			hamiltonGraph[v][i]--; hamiltonGraph[i][v]--;
-			//cout << "Rekurencja numer: " << nrRekurencji++ << " wierzcholek: " << v << endl;
-			findHamilton(i, nodesActually);
-			nrRekurencji--;
-			if (hamiltonFound)		//tak, doszlo do tego, ze nie ufam nawet returnowi...
-				return;
-			else
-				hamiltonGraph[v][i]++; hamiltonGraph[i][v]++;
-		}
+	if(resultHamilton.size()<nodesActually)
+		for (int i = 0; i < nodesActually; i++)
+			if (hamiltonGraph[v][i] && !visited[i]) 
+			{
+				hamiltonGraph[v][i]--; hamiltonGraph[i][v]--;
+				//cout << "Rekurencja numer: " << nrRekurencji++ << " wierzcholek: " << v << endl;
+				findHamilton(i, nodesActually);
+				nrRekurencji--;
+				if (hamiltonFound)		//tak, doszlo do tego, ze nie ufam nawet returnowi...
+					return;
+				else
+					hamiltonGraph[v][i]++; hamiltonGraph[i][v]++;
+			}
 
 	if (resultHamilton.size() == nodesActually && hamiltonGraph[v][0]) {
 		resultHamilton.push(0);
@@ -194,6 +241,7 @@ int main()
 
 			for (int repeatNumber = 0; repeatNumber < repeats; repeatNumber++)
 			{
+				srand(time(NULL));
 				setGlobal(nodesActually);
 				eulerTime = 0, hamiltonTime = 0;
 				eulerGraph = new int *[nodesActually];
@@ -218,17 +266,17 @@ int main()
 				}
 
 
-				cout << "Searching for Euler" << endl;
+				//cout << "Searching for Euler" << endl;
 				start = clock();
 				findEuler(nodesActually);
-				eulerTime += ((clock() - start) / (double)CLOCKS_PER_SEC);
+				eulerTime += (clock() - start); // (double)CLOCKS_PER_SEC);
 
 				nrRekurencji = 0;
 				hamiltonFound = false;
-				cout << "Searching for Hamilton" << endl;
+				//cout << "Searching for Hamilton" << endl;
 				start = clock();
 				findHamilton(0, nodesActually);
-				hamiltonTime += (clock() - start) / (double)CLOCKS_PER_SEC;
+				hamiltonTime += (clock() - start); // (double)CLOCKS_PER_SEC;
 
 				for (int i = 0; i < nodesActually; i++)
 				{
@@ -247,8 +295,8 @@ int main()
 
 			}
 
-		eulerTime /= (double)repeats;
-		hamiltonTime /= (double)repeats;
+		eulerTime /= (double)(repeats*CLOCKS_PER_SEC);
+		hamiltonTime /= (double)(repeats*CLOCKS_PER_SEC);
 		cout << endl << "Euler time for " << nodesActually << " nodes : " << eulerTime << endl;
 		cout << "Hamilton time for " << nodesActually << " nodes : " << hamiltonTime << endl;
 
