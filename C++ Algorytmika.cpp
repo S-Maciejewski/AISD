@@ -5,11 +5,11 @@
 #include <stack>
 #include <fstream>
 
-#define nodes 50
+#define nodes 10
 #define sat 0.3
 #define steps 15
-#define step 10
-#define repeats 1
+#define step 5
+#define repeats 5
 
 using namespace std;
 
@@ -22,6 +22,7 @@ bool hamiltonFound = false;
 
 int ** eulerGraph;
 int ** hamiltonGraph;
+int nrRekurencji = 0;
 
 void setGlobal(int nodeAmount)
 {
@@ -148,9 +149,13 @@ void findHamilton(int v, int nodesActually) {
 		if (hamiltonGraph[v][i] && !visited[i]) 
 		{
 			hamiltonGraph[v][i]--; hamiltonGraph[i][v]--;
+			//cout << "Rekurencja numer: " << nrRekurencji++ << " wierzcholek: " << v << endl;
 			findHamilton(i, nodesActually);
-			if (hamiltonFound) return;
-			hamiltonGraph[v][i]++; hamiltonGraph[i][v]++;
+			nrRekurencji--;
+			if (hamiltonFound)		//tak, doszlo do tego, ze nie ufam nawet returnowi...
+				return;
+			else
+				hamiltonGraph[v][i]++; hamiltonGraph[i][v]++;
 		}
 
 	if (resultHamilton.size() == nodesActually && hamiltonGraph[v][0]) {
@@ -185,61 +190,62 @@ int main()
 		int nodesActually = nodes + stepNumber*step;
 		double eulerTime = 0, hamiltonTime = 0;
 
-		setGlobal(nodesActually);
+		//setGlobal(nodesActually);
 
-		for (int repeatNumber = 0; repeatNumber < repeats; repeatNumber++)
-		{
-			eulerTime = 0, hamiltonTime = 0;
-			eulerGraph = new int *[nodesActually];
-			for (int i = 0; i < nodesActually; i++)
+			for (int repeatNumber = 0; repeatNumber < repeats; repeatNumber++)
 			{
-				eulerGraph[i] = new int[nodesActually];
-				for (int j = 0; j < nodesActually; j++)
-					eulerGraph[i][j] = 0;
+				setGlobal(nodesActually);
+				eulerTime = 0, hamiltonTime = 0;
+				eulerGraph = new int *[nodesActually];
+				for (int i = 0; i < nodesActually; i++)
+				{
+					eulerGraph[i] = new int[nodesActually];
+					for (int j = 0; j < nodesActually; j++)
+						eulerGraph[i][j] = 0;
+				}
+
+				generate(nodesActually);
+
+				//printGraph(nodesActually);
+
+				hamiltonGraph = new int *[nodesActually];
+				for (int i = 0; i < nodesActually; i++)
+				{
+					visited[i] = false;
+					hamiltonGraph[i] = new int[nodesActually];
+					for (int j = 0; j < nodesActually; j++)
+						hamiltonGraph[i][j] = eulerGraph[i][j];
+				}
+
+
+				cout << "Searching for Euler" << endl;
+				start = clock();
+				findEuler(nodesActually);
+				eulerTime += ((clock() - start) / (double)CLOCKS_PER_SEC);
+
+				nrRekurencji = 0;
+				hamiltonFound = false;
+				cout << "Searching for Hamilton" << endl;
+				start = clock();
+				findHamilton(0, nodesActually);
+				hamiltonTime += (clock() - start) / (double)CLOCKS_PER_SEC;
+
+				for (int i = 0; i < nodesActually; i++)
+				{
+					delete eulerGraph[i];
+					delete hamiltonGraph[i];
+				}
+
+				while (!usedNodes.empty()) usedNodes.pop();
+				while (!resultEuler.empty()) resultEuler.pop();
+				while (!resultHamilton.empty()) resultHamilton.pop();
+				for (int i = 0; i < nodesActually; i++) visited[i] = false;
+				
+
+				delete eulerGraph;
+				delete hamiltonGraph;
+
 			}
-
-			generate(nodesActually);
-
-			//printGraph(nodesActually);
-
-			hamiltonGraph = new int *[nodesActually];
-			for (int i = 0; i < nodesActually; i++)
-			{
-				visited[i] = false;
-				hamiltonGraph[i] = new int[nodesActually];
-				for (int j = 0; j < nodesActually; j++)
-					hamiltonGraph[i][j] = eulerGraph[i][j];
-			}
-
-
-			cout << "Searching for Euler" << endl;
-			start = clock();
-			findEuler(nodesActually);
-			eulerTime += ((clock() - start) / (double)CLOCKS_PER_SEC);
-
-
-			cout << "Searching for Hamilton" << endl;
-			start = clock();
-			findHamilton(0, nodesActually);
-			hamiltonTime += (clock() - start) / (double)CLOCKS_PER_SEC;
-
-			for (int i = 0; i < nodesActually; i++)
-			{
-				delete eulerGraph[i];
-				delete hamiltonGraph[i];
-			}
-
-			while (!usedNodes.empty()) usedNodes.pop();
-			while (!resultEuler.empty()) resultEuler.pop();
-			while (!resultHamilton.empty()) resultHamilton.pop();
-
-
-			delete eulerGraph;
-			delete hamiltonGraph;
-			for (int i = 0; i < nodesActually; i++) visited[i] = false;
-
-
-		}
 
 		eulerTime /= (double)repeats;
 		hamiltonTime /= (double)repeats;
