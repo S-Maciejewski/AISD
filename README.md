@@ -1,5 +1,3 @@
 # AISD
-Zadanie 4 na AISD, termin - 15/05/2017
-
-z pliku:
-wypisać eulera i wszystkie hamiltony
+Zadania z Algorytmów i Struktur Danych na 2. semestrze Informatyki, WI, PP.
+Kolejne zadania wraz ze sprawozdaniem, kodem i pomiarami znajdują się w kolejnych gałęziach.
